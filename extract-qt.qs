@@ -140,7 +140,7 @@ Controller.prototype.ComponentSelectionPageCallback = function() {
     } else {
        log("Use default component list");
     }
-    gui.clickButton(buttons.NextButton);
+    gui.clickButton(buttons.NextButton, 3000);
 }
 Controller.prototype.IntroductionPageCallback = function() {
     log("Introduction Page");
