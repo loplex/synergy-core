@@ -12,7 +12,8 @@ addons:
 
 install:
   - if [ $TRAVIS_OS_NAME = windows ]; then
-      # printf '#choco install wixtoolset';
+      printf '#choco install wixtoolset';
+      printf 'test' && \
       wget "https://download.qt.io/archive/online_installers/3.0/qt-unified-windows-x86-3.0.6-online.exe" && \
         LIST_PACKAGES=0 && OUTPUT='C:\Qt' && PACKAGES=qt.58.win64_msvc2015_64 && \
         ./qt-unified-windows-x86-3.0.6-online.exe -v --script extract-qt.qs | grep "\(QTCI\|operation\)";
