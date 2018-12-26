@@ -1,3 +1,7 @@
+var env_list_packages = installer.environmentVariable("LIST_PACKAGES");
+var env_output = installer.environmentVariable("OUTPUT");
+var env_packages = installer.environmentVariable("PACKAGES");
+
 function abortInstaller()
 {
     installer.setDefaultPageVisible(QInstaller.Introduction, false);
@@ -95,7 +99,7 @@ Controller.prototype.ComponentSelectionPageCallback = function() {
       log(packages.join(" "));
     }
       
-    if ($LIST_PACKAGES) {
+    if (env_list_packages) {
         list_packages();
         gui.clickButton(buttons.CancelButton);
         return;
@@ -105,7 +109,7 @@ Controller.prototype.ComponentSelectionPageCallback = function() {
         return str.replace(/^ +/,"").replace(/ *$/,"");
     }
     var widget = gui.currentPageWidget();
-    var packages = trim("$PACKAGES").split(",");
+    var packages = trim(env_packages).split(",");
     if (packages.length > 0 && packages[0] !== "") {
         widget.deselectAll();
         var components = installer.components();
@@ -144,10 +148,10 @@ Controller.prototype.IntroductionPageCallback = function() {
     gui.clickButton(buttons.NextButton);
 }
 Controller.prototype.TargetDirectoryPageCallback = function() {
-    log("Set target installation page: $OUTPUT");
+    log("Set target installation page: " + env_output);
     var widget = gui.currentPageWidget();
     if (widget != null) {
-        widget.TargetDirectoryLineEdit.setText("$OUTPUT");
+        widget.TargetDirectoryLineEdit.setText(env_output);
     }
     
     gui.clickButton(buttons.NextButton);
