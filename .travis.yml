@@ -8,7 +8,7 @@ before_install:
 
 install:
   - #choco install wixtoolset
-  - EXPORT LIST_PACKAGES=0 && export OUTPUT='C:\Qt' && export PACKAGES=qt.58.win64_msvc2015_64 && ./qt-unified-windows-x86-3.0.6-online.exe -v --script extract-qt.qs
+  - export LIST_PACKAGES=0 && export OUTPUT='C:\Qt' && export PACKAGES=qt.58.win64_msvc2015_64 && ./qt-unified-windows-x86-3.0.6-online.exe -v --script extract-qt.qs
 
 script:
   - export CMAKE_PREFIX_PATH='C:\Qt\5.8.0\msvc2015_64'
