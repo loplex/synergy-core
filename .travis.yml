@@ -4,10 +4,11 @@ os:
   - windows
   - linux
 
-matrix:
-  include:
-  - os: windows
-    env: CMAKE_PREFIX_PATH='C:\Qt\5.8.0\msvc2015_64'
+#matrix:
+#  include:
+#  - os: windows
+
+env: CMAKE_PREFIX_PATH='C:\Qt\5.8.0\msvc2015_64'
 
 dist: xenial
 
