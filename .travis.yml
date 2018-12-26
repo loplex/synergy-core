@@ -8,7 +8,8 @@ dist: xenial
 
 addons:
   apt:
-    packages: qtbase5-dev cmake make g++ xorg-dev libssl-dev libx11-dev libsodium-dev libgl1-mesa-glx libegl1-mesa libcurl4-openssl-dev libavahi-compat-libdnssd-dev qtdeclarative5-dev libqt5svg5-dev libsystemd-dev dpkg-dev git-buildpackage
+    - packages: qtbase5-dev cmake make g++ xorg-dev libssl-dev libx11-dev libsodium-dev libgl1-mesa-glx libegl1-mesa libcurl4-openssl-dev libavahi-compat-libdnssd-dev qtdeclarative5-dev libqt5svg5-dev libsystemd-dev
+    - dpkg-dev git-buildpackage
 
 install:
   - if [[ $TRAVIS_OS_NAME = windows ]]; then
@@ -23,9 +24,9 @@ install:
 env:
   - CMAKE_PREFIX_PATH='C:\Qt\5.8.0\msvc2015_64'
 
-script:  
+script:
+  - [[ $TRAVIS_OS_NAME = linux ]] && gbp dch
   - mkdir build
   - cd build
-  - cmake -D SYNERGY_ENTERPRISE=ON ..
+  - cmake -D SYNERGY_ENTERPRISE=ON .. || cat 'CMakeFiles/CMakeOutput.log' && exit 1
   - cmake --build .
-  - gbp dch
