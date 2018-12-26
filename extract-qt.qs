@@ -164,6 +164,10 @@ Controller.prototype.LicenseAgreementPageCallback = function() {
     }
     gui.clickButton(buttons.NextButton);
 }
+Controller.prototype.StartMenuDirectoryPageCallback = function() {
+    log("Confirm Start Menu shortcuts");
+    gui.clickButton(buttons.NextButton, 500);
+}
 Controller.prototype.ReadyForInstallationPageCallback = function() {
     log("Ready to install");
     // Bug? If commit button pressed too quickly finished callback might not show the checkbox to disable running qt creator
