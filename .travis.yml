@@ -34,9 +34,9 @@ install:
       chmod +x "$qt_installer_filename";
       qt-unified-windows-x86-3.0.6-online.exe;
       qt_install_cmd="${qt_installer_filename} -v --script './extract-qt.qs' | grep '\(QTCI\|operation\)'";
-      sh -c '$qt_installer_filename'; \
-      #OUTPUT='C:/Qt' && PACKAGES='qt.58.win64_msvc2015_64' && $qt_install_cmd ;    # printf '#choco install wixtoolset;';
+      sh -c '$qt_installer_filename';
     fi
+#OUTPUT='C:/Qt' && PACKAGES='qt.58.win64_msvc2015_64' && $qt_install_cmd ;    # printf '#choco install wixtoolset;';
 #     if [[ -z "$VERBOSE" ]]; then
 #        qt_install_cmd="'./${qt_installer_filename}' --script './extract-qt.qs'";
 #      else;
