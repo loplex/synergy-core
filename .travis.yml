@@ -18,6 +18,8 @@ cache:
 
 addons:
   apt:
+    sources:
+    - sourceline: 'ppa:chronitis/debtools'
     packages:
     - cmake make g++
     - libssl-dev libsodium-dev libcurl4-openssl-dev libavahi-compat-libdnssd-dev libsystemd-dev
@@ -28,7 +30,7 @@ install:
   - if [[ $TRAVIS_OS_NAME = windows ]]; then
       qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
       wget "https://download.qt.io/archive/online_installers/3.0/$qt_installer_filename";
-      qt_install_cmd="'./${qt_installer_filename}' -v --script './extract-qt.qs' | grep '\(QTCI\|operation\)'";
+      qt_install_cmd="'${qt_installer_filename}' -v --script './extract-qt.qs' | grep '\(QTCI\|operation\)'";
       OUTPUT='C:/Qt' && PACKAGES='qt.58.win64_msvc2015_64' && ${qt_install_cmd};
       printf '#choco install wixtoolset;';
     fi
