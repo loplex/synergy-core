@@ -62,7 +62,7 @@ install:
 
 script:
   - sudo pip install gbp
-  - #pip install --user gbp
+  - echo pip install --user gbp
   - which -a gbp
   - touch debian/changelog
   - if [[ $TRAVIS_OS_NAME = linux ]]; then gbp dch --ignore-branch ; fi
