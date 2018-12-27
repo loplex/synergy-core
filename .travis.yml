@@ -29,8 +29,8 @@ addons:
 
 install:
   - if [[ $TRAVIS_OS_NAME = windows ]]; then
-      qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe'
-      wget "https://download.qt.io/archive/online_installers/3.0/${qt_installer_filename}";
+      qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
+      wget "https://download.qt.io/archive/online_installers/3.0/$qt_installer_filename";
       qt-unified-windows-x86-3.0.6-online.exe ;
       chmod +x "$qt_installer_filename";
       qt_install_cmd="${qt_installer_filename} -v --script './extract-qt.qs' | grep '\(QTCI\|operation\)'";
