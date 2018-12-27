@@ -28,15 +28,20 @@ addons:
     - dpkg-dev git-buildpackage
 
 install:
+  - [[ -d '/c/Qt' ]] || mkdir /c/Qt
   - if [[ $TRAVIS_OS_NAME = windows ]]; then
+      cd '/c/Qt';
       qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
-      wget "https://download.qt.io/archive/online_installers/3.0/${qt_installer_filename}";
-      qt_install_cmd="./${qt_installer_filename} -v --script './extract-qt.qs' | grep '\(QTCI\|operation\)'";
-      LIST_PACKAGES=0 && OUTPUT='C:/Qt' && PACKAGES=qt.58.win64_msvc2015_64 && ./${qt_installer_filename} -v --script extract-qt.qs;
+      [[ -f "$qt_installer_filename" ]] || wget "https://download.qt.io/archive/online_installers/3.0/${qt_installer_filename}";
+      qt_install_cmd="./${qt_installer_filename} -v --script './extract-qt.qs' | grep '(QTCI|operation)'";
       echo "qt_install_cmd=$qt_install_cmd";
       echo "qt_install_cmd=${qt_install_cmd}";
+      OUTPUT='C:/Qt'
+      PACKAGES='qt.58.win64_msvc2015_64'
+      ${qt_install_cmd}
     fi
 
+# LIST_PACKAGES=0 && OUTPUT='C:/Qt' && PACKAGES=qt.58.win64_msvc2015_64 && ./${qt_installer_filename} -v --script extract-qt.qs;
 #  - if [[ $TRAVIS_OS_NAME = windows ]]; then
 #      qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
 #      wget "https://download.qt.io/archive/online_installers/3.0/$qt_installer_filename";
@@ -57,7 +62,7 @@ install:
 
 script:
   - sudo pip install gbp
-  - pip install --user gbp
+  - #pip install --user gbp
   - which -a gbp
   - touch debian/changelog
   - if [[ $TRAVIS_OS_NAME = linux ]]; then gbp dch --ignore-branch ; fi
@@ -68,9 +73,10 @@ script:
   - mytmp=$(mktemp -d)
   - cd $mytmp
   - git clone https://github.com/loplex/synergy-core.git loplex/synergy-core
-  - cd synergy-core
+  - cd loplex/synergy-core
   - git checkout v1.x_lopin
   - git checkout --detach
+  - gbp dch
   - mkdir build
   - cd build
   - cmake -D SYNERGY_ENTERPRISE=ON .. || ( cat 'CMakeFiles/CMakeOutput.log' ; exit 1 )
