@@ -13,7 +13,8 @@ dist: xenial
 
 addons:
   apt:
-    packages: qtbase5-dev cmake make g++ xorg-dev libssl-dev libx11-dev libsodium-dev libgl1-mesa-glx libegl1-mesa libcurl4-openssl-dev libavahi-compat-libdnssd-dev qtdeclarative5-dev libqt5svg5-dev libsystemd-dev dpkg-dev git-buildpackage
+    packages:
+    - qtbase5-dev cmake make g++ xorg-dev libssl-dev libx11-dev libsodium-dev libgl1-mesa-glx libegl1-mesa libcurl4-openssl-dev libavahi-compat-libdnssd-dev qtdeclarative5-dev libqt5svg5-dev libsystemd-dev dpkg-dev git-buildpackage
 
 install:
   - if [[ $TRAVIS_OS_NAME = windows ]]; then
@@ -30,7 +31,10 @@ env:
 
 script:
   - if [[ $TRAVIS_OS_NAME = linux ]]; then gbp dch --ignore-branch ; fi
+  - echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
+  - pwd
+  - ls -l
   - mkdir build
   - cd build
-  - cmake -D SYNERGY_ENTERPRISE=ON .. || cat 'CMakeFiles/CMakeOutput.log' && ll "$CMAKE_PREFIX_PATH" && find "$CMAKE_PREFIX_PATH" && exit 1
+  - cmake -D SYNERGY_ENTERPRISE=ON .. || cat 'CMakeFiles/CMakeOutput.log' && ls -l "$CMAKE_PREFIX_PATH" && find "$CMAKE_PREFIX_PATH" && exit 1
   - cmake --build .
