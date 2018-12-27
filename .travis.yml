@@ -4,17 +4,19 @@ os:
   - windows
   - linux
 
-#matrix:
-#  include:
-#  - os: windows
-#    env: CMAKE_PREFIX_PATH='C:\Qt\5.8.0\msvc2015_64'
+matrix:
+  include:
+  - os: windows
+    env: CMAKE_PREFIX_PATH='C:\Qt\5.8.0\msvc2015_64'
 
 dist: xenial
 
 addons:
   apt:
     packages:
-    - qtbase5-dev cmake make g++ xorg-dev libssl-dev libx11-dev libsodium-dev libgl1-mesa-glx libegl1-mesa libcurl4-openssl-dev libavahi-compat-libdnssd-dev qtdeclarative5-dev libqt5svg5-dev libsystemd-dev
+    - cmake make g++
+    - libssl-dev libsodium-dev libcurl4-openssl-dev libavahi-compat-libdnssd-dev libsystemd-dev
+    - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesanqtbase5-dev qtdeclarative5-dev libqt5svg5-dev
     - dpkg-dev git-buildpackage
 
 install:
@@ -22,11 +24,11 @@ install:
       wget "https://download.qt.io/archive/online_installers/3.0/qt-unified-windows-x86-3.0.6-online.exe";
       LIST_PACKAGES=0 && OUTPUT='C:/Qt' && PACKAGES=qt.58.win64_msvc2015_64 && ./qt-unified-windows-x86-3.0.6-online.exe -v --script extract-qt.qs;
       printf '#| grep "\(QTCI\|operation\)";';
-      printf '#choco install wixtoolset';';
+      printf '#choco install wixtoolset;';
     fi
 
-env:
-  - CMAKE_PREFIX_PATH='C:/Qt/5.8.0/msvc2015_64'
+#env:
+#  - CMAKE_PREFIX_PATH='C:/Qt/5.8.0/msvc2015_64'
 
 script:
   - touch debian/changelog
@@ -34,6 +36,7 @@ script:
   - echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
   - pwd
   - ls -l
+  - ls -l debian
   - mkdir build
   - cd build
   - cmake -D SYNERGY_ENTERPRISE=ON .. || ( cat 'CMakeFiles/CMakeOutput.log' ; exit 1 )
