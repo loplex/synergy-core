@@ -17,12 +17,12 @@ addons:
     packages:
     - cmake make g++
     - libssl-dev libsodium-dev libcurl4-openssl-dev libavahi-compat-libdnssd-dev libsystemd-dev
-    - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesan qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
+    - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesa qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
     - dpkg-dev git-buildpackage
 
 install:
   - if [[ $TRAVIS_OS_NAME = windows ]]; then
-      qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe'
+      qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
       wget "https://download.qt.io/archive/online_installers/3.0/$qt_installer_filename";
       if [[ -z "$VERBOSE" ]]; then
         qt_install_cmd="'./${qt_installer_filename}' --script './extract-qt.qs'";
