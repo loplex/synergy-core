@@ -12,6 +12,10 @@ matrix:
 
 dist: xenial
 
+cache:
+  directories:
+    - /c/Qt
+
 addons:
   apt:
     packages:
@@ -24,14 +28,15 @@ install:
   - if [[ $TRAVIS_OS_NAME = windows ]]; then
       qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
       wget "https://download.qt.io/archive/online_installers/3.0/$qt_installer_filename";
-      if [[ -z "$VERBOSE" ]]; then
-        qt_install_cmd="'./${qt_installer_filename}' --script './extract-qt.qs'";
-      else;
-        qt_install_cmd="'./${qt_installer_filename}' -v --script './extract-qt.qs' | grep '\(QTCI\|operation\)'";
-      fi;
+      qt_install_cmd="'./${qt_installer_filename}' -v --script './extract-qt.qs' | grep '\(QTCI\|operation\)'";
       OUTPUT='C:/Qt' && PACKAGES='qt.58.win64_msvc2015_64' && ${qt_install_cmd};
       printf '#choco install wixtoolset;';
     fi
+#     if [[ -z "$VERBOSE" ]]; then
+#        qt_install_cmd="'./${qt_installer_filename}' --script './extract-qt.qs'";
+#      else;
+#        qt_install_cmd="'./${qt_installer_filename}' -v --script './extract-qt.qs' | grep '\(QTCI\|operation\)'";
+#      fi;
 
 #env:
 #  - CMAKE_PREFIX_PATH='C:/Qt/5.8.0/msvc2015_64'
