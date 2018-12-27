@@ -28,17 +28,18 @@ addons:
     - dpkg-dev git-buildpackage
 
 install:
-  - if ! [[ -d '/c/Qt' ]]; then mkdir '/c/Qt'; fi
+  - echo if ! [[ -d '/c/Qt' ]]; then mkdir '/c/Qt'; fi
   - if [[ "$TRAVIS_OS_NAME" = 'windows' && -d '/c/Qt/5.8.0/msvc2015_64' ]]; then
       cd '/c/Qt';
       qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
-      [[ -f "$qt_installer_filename" ]] || wget "https://download.qt.io/archive/online_installers/3.0/${qt_installer_filename}";
+      echo '[[ -f "$qt_installer_filename" ]] ||';
+      wget "https://download.qt.io/archive/online_installers/3.0/${qt_installer_filename}";
       qt_install_cmd="./${qt_installer_filename} -v --script './extract-qt.qs' | grep '(QTCI|operation)'";
       echo "qt_install_cmd=$qt_install_cmd";
       echo "qt_install_cmd=${qt_install_cmd}";
       OUTPUT='C:/Qt';
       PACKAGES='qt.58.win64_msvc2015_64';
-      ${qt_install_cmd}
+      $qt_install_cmd;
     fi
 
 # LIST_PACKAGES=0 && OUTPUT='C:/Qt' && PACKAGES=qt.58.win64_msvc2015_64 && ./${qt_installer_filename} -v --script extract-qt.qs;
