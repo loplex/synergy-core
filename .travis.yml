@@ -28,7 +28,7 @@ addons:
     - dpkg-dev git-buildpackage
 
 install:
-  - echo if ! [[ -d '/c/Qt' ]]; then mkdir '/c/Qt'; fi
+  - echo "if ! [[ -d '/c/Qt' ]]; then mkdir '/c/Qt'; fi"
   - if [[ "$TRAVIS_OS_NAME" = 'windows' && -d '/c/Qt/5.8.0/msvc2015_64' ]]; then
       cd '/c/Qt';
       qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
