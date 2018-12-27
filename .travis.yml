@@ -38,7 +38,7 @@ install:
       echo "qt_install_cmd=${qt_install_cmd}";
       OUTPUT='C:/Qt';
       PACKAGES='qt.58.win64_msvc2015_64';
-      ${qt_install_cmd};
+      ${qt_install_cmd}
     fi
 
 # LIST_PACKAGES=0 && OUTPUT='C:/Qt' && PACKAGES=qt.58.win64_msvc2015_64 && ./${qt_installer_filename} -v --script extract-qt.qs;
