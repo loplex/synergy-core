@@ -1,13 +1,14 @@
 language: cpp
 
-os:
-  - windows
-  - linux
+#os:
+#  - windows
+#  - linux
 
 matrix:
   include:
   - os: windows
-    env: CMAKE_PREFIX_PATH='C:\Qt\5.8.0\msvc2015_64'
+    env: CMAKE_PREFIX_PATH='C:/Qt/5.8.0/msvc2015_64'
+  - os: linux
 
 dist: xenial
 
@@ -16,14 +17,19 @@ addons:
     packages:
     - cmake make g++
     - libssl-dev libsodium-dev libcurl4-openssl-dev libavahi-compat-libdnssd-dev libsystemd-dev
-    - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesanqtbase5-dev qtdeclarative5-dev libqt5svg5-dev
+    - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesan qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
     - dpkg-dev git-buildpackage
 
 install:
   - if [[ $TRAVIS_OS_NAME = windows ]]; then
-      wget "https://download.qt.io/archive/online_installers/3.0/qt-unified-windows-x86-3.0.6-online.exe";
-      LIST_PACKAGES=0 && OUTPUT='C:/Qt' && PACKAGES=qt.58.win64_msvc2015_64 && ./qt-unified-windows-x86-3.0.6-online.exe -v --script extract-qt.qs;
-      printf '#| grep "\(QTCI\|operation\)";';
+      qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe'
+      wget "https://download.qt.io/archive/online_installers/3.0/$qt_installer_filename";
+      if [[ -z "$VERBOSE" ]]; then
+        qt_install_cmd="'./${qt_installer_filename}' --script './extract-qt.qs'";
+      else;
+        qt_install_cmd="'./${qt_installer_filename}' -v --script './extract-qt.qs' | grep '\(QTCI\|operation\)'";
+      fi;
+      OUTPUT='C:/Qt' && PACKAGES='qt.58.win64_msvc2015_64' && ${qt_install_cmd};
       printf '#choco install wixtoolset;';
     fi
 
