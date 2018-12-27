@@ -18,14 +18,22 @@ cache:
 
 addons:
   apt:
-    sources:
-    - sourceline: 'ppa:chronitis/debtools'
-    - sourceline: 'deb http://ppa.launchpad.net/chronitis/debtools/ubuntu artful main'
     packages:
     - cmake make g++
     - libssl-dev libsodium-dev libcurl4-openssl-dev libavahi-compat-libdnssd-dev libsystemd-dev
     - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesa qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
     - dpkg-dev git-buildpackage
+
+#    sources:
+#    - sourceline: 'ppa:chronitis/debtools'
+#    - sourceline: 'deb http://ppa.launchpad.net/chronitis/debtools/ubuntu artful main'
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
+      wget 'http://archive.ubuntu.com/ubuntu/pool/universe/g/git-buildpackage/git-buildpackage_0.9.8_all.deb';
+      sudo dpkg -i './git-buildpackage_0.9.8_all.deb';
+    fi
+  - echo "DONE before_install"
 
 install:
   - echo "if ! [[ -d '/c/Qt' ]]; then mkdir '/c/Qt'; fi"
@@ -33,9 +41,10 @@ install:
       qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
       echo '[[ -f "$qt_installer_filename" ]] ||';
       wget -P '/tmp' "https://download.qt.io/archive/online_installers/3.0/${qt_installer_filename}";
-      qt_install_cmd="/tmp/${qt_installer_filename} -v --script './extract-qt.qs' | grep '(QTCI|operation)'";
+      qt_install_cmd="/tmp/${qt_installer_filename} -v --script 'extract-qt.qs' | grep '(QTCI|operation)'";
       OUTPUT='C:/Qt' && PACKAGES='qt.58.win64_msvc2015_64' && $qt_install_cmd;
     fi
+  - echo "DONE install"
 
 # LIST_PACKAGES=0 && OUTPUT='C:/Qt' && PACKAGES=qt.58.win64_msvc2015_64 && ./${qt_installer_filename} -v --script extract-qt.qs;
 #  - if [[ $TRAVIS_OS_NAME = windows ]]; then
@@ -57,23 +66,22 @@ install:
 #  - CMAKE_PREFIX_PATH='C:/Qt/5.8.0/msvc2015_64'
 
 script:
-  - echo sudo pip install gbp
-  - echo pip install --user gbp
-  - which -a gbp
-  - touch debian/changelog
   - if [[ $TRAVIS_OS_NAME = linux ]]; then gbp dch --ignore-branch ; fi
   - echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
   - pwd
-  - ls -l
+  - ls -la
   - ls -l debian
-  - mytmp=$(mktemp -d)
-  - cd $mytmp
-  - git clone https://github.com/loplex/synergy-core.git loplex/synergy-core
-  - cd loplex/synergy-core
-  - git checkout v1.x_lopin
-  - git checkout --detach
-  - gbp dch
+  - if [[ $TRAVIS_OS_NAME = linux ]]; then dpkg-buildpackage -us -uc ; fi
   - mkdir build
   - cd build
-  - cmake -D SYNERGY_ENTERPRISE=ON .. || ( cat 'CMakeFiles/CMakeOutput.log' ; exit 1 )
+  - cmake -D SYNERGY_ENTERPRISE=ON .. || ( cat 'CMakeFiles/CMakeOutput.log' ; false )
   - cmake --build .
+  - echo "DONE script"
+
+#  - mytmp=$(mktemp -d)
+#  - cd $mytmp
+#  - git clone https://github.com/loplex/synergy-core.git loplex/synergy-core
+#  - cd loplex/synergy-core
+#  - git checkout v1.x_lopin
+#  - git checkout --detach
+#  - gbp dch
