@@ -37,28 +37,31 @@ install:
       mkdir -p '/qt_installer/download' ;
       cp "$qt_installer_automation_script" '/$qt_installer/" ;
       cd '/qt_installer/download' ;
-      # download Qt installer if in cache already
-      if ! [[ -e "$qt_installer_filename" ]]; then wget --progress=bar:force:noscroll "$qt_installer_url" ; fi ;
-      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script "..\\$qt_installer_automation_script" | grep -E '(QTCI|operation)' ;
+      echo '# download Qt installer if in cache already' ;
+      if ! [-e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" ; fi ;
+      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script "..\\$qt_installer_automation_script" ;
     fi
 
+#env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script "..\\$qt_installer_automation_script"
+# | grep -E '(QTCI|operation)'
+
 script:
-  # cmake build
+  - echo '# cmake build'
   - mkdir build && cd build
   - cmake -D SYNERGY_ENTERPRISE=ON ..
   - cmake --build .
-  # tmp_debug
-  - find -print0 |xargs -0 ls -ld
-  # make linux installer
+  - echo '# tmp_debug'
+  - find -print0 | xargs -0 ls -ld
+  - echo '# make linux installer'
   - if [[ $TRAVIS_OS_NAME = linux ]]; then
-      # create debian/changelog from git history
+      echo '# create debian/changelog from git history' ;
       cd .. && gbp dch --ignore-branch ;
-      # tmp_debug
-      find -print0 |xargs -0 ls -ld ;
+      echo '# tmp_debug' ;
+      find -print0 | xargs -0 ls -ld ;
       dpkg-buildpackage -us -uc ;
     fi
 
 after_failure:
   - cat 'CMakeFiles/CMakeOutput.log'
   - cd /
-  - find -print0 |xargs -0 ls -ld
+  - find -print0 | xargs -0 ls -ld
