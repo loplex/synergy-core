@@ -39,7 +39,7 @@ install:
       cd '/qt_installer/download' ;
       echo '# download Qt installer if in cache already' ;
       if ! [-e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" ; fi ;
-      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script "..\\$qt_installer_automation_script" ;
+      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script '../extract-qt.qs' ;
     fi
 
 #env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script "..\\$qt_installer_automation_script"
