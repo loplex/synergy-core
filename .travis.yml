@@ -31,7 +31,7 @@ addons:
 before_install:
   - if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
       wget 'http://archive.ubuntu.com/ubuntu/pool/universe/g/git-buildpackage/git-buildpackage_0.9.8_all.deb';
-      sudo dpkg -i './git-buildpackage_0.9.8_all.deb';
+      sudo dpkg --unpack './git-buildpackage_0.9.8_all.deb';
     fi
   - echo "DONE before_install"
 
@@ -39,9 +39,10 @@ install:
   - echo "if ! [[ -d '/c/Qt' ]]; then mkdir '/c/Qt'; fi"
   - if [[ "$TRAVIS_OS_NAME" = "windows" && ! -d "/c/Qt/5.8.0/msvc2015_64" ]]; then
       qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
+      qt_installer_automation_script="${PWD}/extract-qt.qs";
       echo '[[ -f "$qt_installer_filename" ]] ||';
       wget -P '/tmp' "https://download.qt.io/archive/online_installers/3.0/${qt_installer_filename}";
-      qt_install_cmd="/tmp/${qt_installer_filename} -v --script 'extract-qt.qs' | grep '(QTCI|operation)'";
+      qt_install_cmd="/tmp/${qt_installer_filename} -v --script '${qt_installer_automation_script}' | grep '(QTCI|operation)'";
       OUTPUT='C:/Qt' && PACKAGES='qt.58.win64_msvc2015_64' && $qt_install_cmd;
     fi
   - echo "DONE install"
