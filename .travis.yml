@@ -19,7 +19,7 @@ cache:
 addons:
   apt:
     sources:
-    - sourceline: 'ppa:lopin/git-buildpackage-backports
+    - sourceline: 'ppa:lopin/git-buildpackage-backports'
     packages:
     - cmake make g++
     - libssl-dev libsodium-dev libcurl4-openssl-dev libavahi-compat-libdnssd-dev libsystemd-dev
