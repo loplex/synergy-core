@@ -36,9 +36,18 @@ install:
       qt_installer_automation_script='extract-qt.qs';
       echo "qt_installer_automation_script=$qt_installer_automation_script";
       wget --progress=bar:force:noscroll "https://download.qt.io/archive/online_installers/3.0/${qt_installer_filename}";
-      qt_install_cmd="./${qt_installer_filename} -v --script ${qt_installer_automation_script} | grep '(QTCI|operation)'";
-      echo "qt_install_cmd=$qt_install_cmd";
-      env OUTPUT='C:/Qt' PACKAGES='qt.58.win64_msvc2015_64' $qt_install_cmd;
+      if [[ -z "$VERBOSE_QT_INSTALL" ]]; then
+        qt_install_cmd="./${qt_installer_filename} --script ${qt_installer_automation_script}";
+        echo "qt_install_cmd=$qt_install_cmd";
+        env OUTPUT='C:/Qt' PACKAGES='qt.58.win64_msvc2015_64' $qt_install_cmd;
+      else
+        qt_install_cmd="./${qt_installer_filename} -v --script ${qt_installer_automation_script} | grep -E '(QTCI|operation)'";
+        qt_install_cmd="./${qt_installer_filename} -v --script ${qt_installer_automation_script}";
+        echo "qt_install_cmd=$qt_install_cmd";
+        echo env OUTPUT='C:/Qt' PACKAGES='qt.58.win64_msvc2015_64' $qt_install_cmd;
+        env OUTPUT='C:/Qt' PACKAGES='qt.58.win64_msvc2015_64' $qt_install_cmd | grep -E '(QTCI|operation)'
+      fi;
+      
     fi
   - echo "DONE install"
 
@@ -52,11 +61,7 @@ install:
 #      sh -c '$qt_installer_filename';
 #    fi
 #OUTPUT='C:/Qt' && PACKAGES='qt.58.win64_msvc2015_64' && $qt_install_cmd ;    # printf '#choco install wixtoolset;';
-#     if [[ -z "$VERBOSE" ]]; then
-#        qt_install_cmd="'./${qt_installer_filename}' --script './extract-qt.qs'";
-#      else;
-#        qt_install_cmd="'./${qt_installer_filename}' -v --script './extract-qt.qs' | grep '\(QTCI\|operation\)'";
-#      fi;
+
 
 #env:
 #  - CMAKE_PREFIX_PATH='C:/Qt/5.8.0/msvc2015_64'
@@ -66,14 +71,14 @@ script:
   - cd build
   - echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
   - cmake -D SYNERGY_ENTERPRISE=ON .. || ( cat 'CMakeFiles/CMakeOutput.log' ; false )
-  - echo ">>> DONE confugure"
+  - echo ">>> DONE configure"
   - cmake --build .
   - echo ">>> DONE build"
-  - find -print0 |xargs ls -ld
+  - find -print0 |xargs -0 ls -ld
   - if [[ $TRAVIS_OS_NAME = linux ]]; then
       gbp dch --ignore-branch;
-      cat debian/changelog
-      dpkg-buildpackage -us -uc
+      cat debian/changelog;
+      dpkg-buildpackage -us -uc;
     fi
   - echo ">>> DONE <<<"
 
