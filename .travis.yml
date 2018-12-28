@@ -6,15 +6,15 @@ language: cpp
 
 matrix:
   include:
-  - os: windows
+  - name: windows
+    os: windows
     env: CMAKE_PREFIX_PATH='C:/Qt/5.8.0/msvc2015_64'
-  - os: linux
-
-dist: xenial
-
-cache:
-  directories:
-    - /c/Qt
+    cache:
+      directories:
+      - /c/Qt
+  - name: linux
+    os: linux
+    dist: xenial
 
 addons:
   apt:
@@ -45,9 +45,8 @@ install:
         qt_install_cmd="./${qt_installer_filename} -v --script ${qt_installer_automation_script}";
         echo "qt_install_cmd=$qt_install_cmd";
         echo env OUTPUT='C:/Qt' PACKAGES='qt.58.win64_msvc2015_64' $qt_install_cmd;
-        env OUTPUT='C:/Qt' PACKAGES='qt.58.win64_msvc2015_64' $qt_install_cmd | grep -E '(QTCI|operation)'
+        env OUTPUT='C:/Qt' PACKAGES='qt.58.win64_msvc2015_64' $qt_install_cmd | grep -E '(QTCI|operation)';
       fi;
-      
     fi
   - echo "DONE install"
 
