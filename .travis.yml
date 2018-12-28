@@ -35,7 +35,7 @@ addons:
 install:
   - if [[ "$TRAVIS_OS_NAME" = "windows" ]]; then
       mkdir -p '/qt_installer/download' ;
-      cp "$qt_installer_automation_script" '/$qt_installer/" ;
+      cp "$qt_installer_automation_script" '/$qt_installer/' ;
       cd '/qt_installer/download' ;
       echo '# download Qt installer if in cache already' ;
       if ! [-e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" ; fi ;
