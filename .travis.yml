@@ -26,14 +26,8 @@ addons:
     - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesa qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
     - dpkg-dev git-buildpackage fakeroot
 
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then echo 'linux1' ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then echo 'linux2' ; fi
-  - if [[ $TRAVIS_OS_NAME == linux ]]; then echo 'linux3' ; fi
-  - if [[ $TRAVIS_OS_NAME = linux ]]; then echo 'linux4' ; fi
-  - if [[ "$TRAVIS_OS_NAME" = "linux" ]] && echo 'linux5'
-  - if [ "$TRAVIS_OS_NAME" = "linux" ] && echo 'linux6'
-  - echo "DONE before_install"
+#before_install:
+#  - echo "DONE before_install"
 
 install:
   - echo "if ! [[ -d '/c/Qt' ]]; then mkdir '/c/Qt'; fi"
@@ -44,7 +38,7 @@ install:
       wget "https://download.qt.io/archive/online_installers/3.0/${qt_installer_filename}";
       qt_install_cmd="${qt_installer_filename} -v --script ${qt_installer_automation_script} | grep '(QTCI|operation)'";
       echo "qt_install_cmd=$qt_install_cmd";
-      OUTPUT='C:/Qt' && PACKAGES='qt.58.win64_msvc2015_64' && $qt_install_cmd;
+      env OUTPUT='C:/Qt' PACKAGES='qt.58.win64_msvc2015_64' $qt_install_cmd;
     fi
   - echo "DONE install"
 
