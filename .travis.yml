@@ -40,17 +40,22 @@ install:
       echo '# download Qt installer if in cache already' ;
       if ! [-e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" ; fi ;
       cp "../extract-qt.qs" . ;
-      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script 'extract-qt.qs' ;
+      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script 'extract-qt.qs' | grep -E '(QTCI|operation)' ;
       rm 'extract-qt.qs' ;
     fi
 
+# env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script 'extract-qt.qs' ;
 #      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script '../extract-qt.qs' ;
 #env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script "..\\$qt_installer_automation_script"
 # | grep -E '(QTCI|operation)'
 
 script:
+  - echo "TRAVIS_BUILD_DIR: $TRAVIS_BUILD_DIR"
+  - cd "$TRAVIS_BUILD_DIR"
+  - echo "pwd: $(pwd)"
   - echo '# cmake build'
-  - mkdir build && cd build
+  - mkdir build
+  - cd build
   - cmake -D SYNERGY_ENTERPRISE=ON ..
   - cmake --build .
   - echo '# tmp_debug'
