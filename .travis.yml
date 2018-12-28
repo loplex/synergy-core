@@ -50,9 +50,7 @@ install:
 # | grep -E '(QTCI|operation)'
 
 script:
-  - echo "TRAVIS_BUILD_DIR: $TRAVIS_BUILD_DIR"
   - cd "$TRAVIS_BUILD_DIR"
-  - echo "pwd: $(pwd)"
   - echo '# cmake build'
   - mkdir build
   - cd build
