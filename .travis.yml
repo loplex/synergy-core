@@ -8,10 +8,16 @@ matrix:
   include:
   - name: windows
     os: windows
-    env: CMAKE_PREFIX_PATH='C:/Qt/5.8.0/msvc2015_64'
+    env:
+      - CMAKE_PREFIX_PATH='C:/Qt/5.8.0/msvc2015_64'
+      - qt_installer_url="https://download.qt.io/archive/online_installers/3.0/qt-unified-windows-x86-3.0.6-online.exe"
+      - qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe'
+      - qt_installer_automation_script='extract-qt.qs'
+      - qt_installer_packages='qt.58.win64_msvc2015_64'
     cache:
       directories:
       - /c/Qt
+      - /qt_installer/download
   - name: linux
     os: linux
     dist: xenial
@@ -26,65 +32,33 @@ addons:
     - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesa qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
     - dpkg-dev git-buildpackage fakeroot
 
-#before_install:
-#  - echo "DONE before_install"
-
 install:
-  - echo "if ! [[ -d '/c/Qt' ]]; then mkdir '/c/Qt'; fi"
-  - if [[ "$TRAVIS_OS_NAME" = "windows" && ! -d "/c/Qt/5.8.0/msvc2015_64" ]]; then
-      qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
-      qt_installer_automation_script='extract-qt.qs';
-      echo "qt_installer_automation_script=$qt_installer_automation_script";
-      wget --progress=bar:force:noscroll "https://download.qt.io/archive/online_installers/3.0/${qt_installer_filename}";
-      if [[ -z "$VERBOSE_QT_INSTALL" ]]; then
-        qt_install_cmd="./${qt_installer_filename} --script ${qt_installer_automation_script}";
-        echo "qt_install_cmd=$qt_install_cmd";
-        env OUTPUT='C:/Qt' PACKAGES='qt.58.win64_msvc2015_64' $qt_install_cmd;
-      else
-        qt_install_cmd="./${qt_installer_filename} -v --script ${qt_installer_automation_script} | grep -E '(QTCI|operation)'";
-        qt_install_cmd="./${qt_installer_filename} -v --script ${qt_installer_automation_script}";
-        echo "qt_install_cmd=$qt_install_cmd";
-        echo env OUTPUT='C:/Qt' PACKAGES='qt.58.win64_msvc2015_64' $qt_install_cmd;
-        env OUTPUT='C:/Qt' PACKAGES='qt.58.win64_msvc2015_64' $qt_install_cmd | grep -E '(QTCI|operation)';
-      fi;
+  - if [[ "$TRAVIS_OS_NAME" = "windows" ]]; then
+      mkdir -p '/qt_installer/download' ;
+      cp "$qt_installer_automation_script" '/$qt_installer/" ;
+      cd '/qt_installer/download' ;
+      # download Qt installer if in cache already
+      if ! [[ -e "$qt_installer_filename" ]]; then wget --progress=bar:force:noscroll "$qt_installer_url" ; fi ;
+      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script "..\\$qt_installer_automation_script" | grep -E '(QTCI|operation)' ;
     fi
-  - echo "DONE install"
-
-# LIST_PACKAGES=0 && OUTPUT='C:/Qt' && PACKAGES=qt.58.win64_msvc2015_64 && ./${qt_installer_filename} -v --script extract-qt.qs;
-#  - if [[ $TRAVIS_OS_NAME = windows ]]; then
-#      qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
-#      wget "https://download.qt.io/archive/online_installers/3.0/$qt_installer_filename";
-#      qt-unified-windows-x86-3.0.6-online.exe ;
-#      chmod +x "$qt_installer_filename";
-#      qt_install_cmd="${qt_installer_filename} -v --script './extract-qt.qs' | grep '\(QTCI\|operation\)'";
-#      sh -c '$qt_installer_filename';
-#    fi
-#OUTPUT='C:/Qt' && PACKAGES='qt.58.win64_msvc2015_64' && $qt_install_cmd ;    # printf '#choco install wixtoolset;';
-
-
-#env:
-#  - CMAKE_PREFIX_PATH='C:/Qt/5.8.0/msvc2015_64'
 
 script:
-  - mkdir build
-  - cd build
-  - echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
-  - cmake -D SYNERGY_ENTERPRISE=ON .. || ( cat 'CMakeFiles/CMakeOutput.log' ; false )
-  - echo ">>> DONE configure"
+  # cmake build
+  - mkdir build && cd build
+  - cmake -D SYNERGY_ENTERPRISE=ON ..
   - cmake --build .
-  - echo ">>> DONE build"
+  # tmp_debug
   - find -print0 |xargs -0 ls -ld
+  # make linux installer
   - if [[ $TRAVIS_OS_NAME = linux ]]; then
-      gbp dch --ignore-branch;
-      cat debian/changelog;
-      dpkg-buildpackage -us -uc;
+      # create debian/changelog from git history
+      cd .. && gbp dch --ignore-branch ;
+      # tmp_debug
+      find -print0 |xargs -0 ls -ld ;
+      dpkg-buildpackage -us -uc ;
     fi
-  - echo ">>> DONE <<<"
 
-#  - mytmp=$(mktemp -d)
-#  - cd $mytmp
-#  - git clone https://github.com/loplex/synergy-core.git loplex/synergy-core
-#  - cd loplex/synergy-core
-#  - git checkout v1.x_lopin
-#  - git checkout --detach
-#  - gbp dch
+after_failure:
+  - cat 'CMakeFiles/CMakeOutput.log'
+  - cd /
+  - find -print0 |xargs -0 ls -ld
