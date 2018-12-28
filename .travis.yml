@@ -18,15 +18,13 @@ cache:
 
 addons:
   apt:
+    sources:
+    - sourceline: 'ppa:lopin/git-buildpackage-backports
     packages:
     - cmake make g++
     - libssl-dev libsodium-dev libcurl4-openssl-dev libavahi-compat-libdnssd-dev libsystemd-dev
     - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesa qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
     - dpkg-dev git-buildpackage
-
-#    sources:
-#    - sourceline: 'ppa:chronitis/debtools'
-#    - sourceline: 'deb http://ppa.launchpad.net/chronitis/debtools/ubuntu artful main'
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" = "linux" ]]; then
@@ -39,10 +37,11 @@ install:
   - echo "if ! [[ -d '/c/Qt' ]]; then mkdir '/c/Qt'; fi"
   - if [[ "$TRAVIS_OS_NAME" = "windows" && ! -d "/c/Qt/5.8.0/msvc2015_64" ]]; then
       qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe';
-      qt_installer_automation_script="${PWD}/extract-qt.qs";
-      echo '[[ -f "$qt_installer_filename" ]] ||';
+      qt_installer_automation_script="$(pwd)/extract-qt.qs";
+      echo "qt_installer_automation_script=$qt_installer_automation_script";
       wget -P '/tmp' "https://download.qt.io/archive/online_installers/3.0/${qt_installer_filename}";
       qt_install_cmd="/tmp/${qt_installer_filename} -v --script '${qt_installer_automation_script}' | grep '(QTCI|operation)'";
+      echo "qt_install_cmd=$qt_install_cmd";
       OUTPUT='C:/Qt' && PACKAGES='qt.58.win64_msvc2015_64' && $qt_install_cmd;
     fi
   - echo "DONE install"
