@@ -42,7 +42,7 @@ install:
       cp "../extract-qt.qs" . ;
       env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script 'extract-qt.qs' | grep -E '(QTCI|operation)' ;
       rm 'extract-qt.qs' ;
-      choco install wixtoolset
+      choco install wixtoolset ;
     fi
 
 # env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script 'extract-qt.qs' ;
