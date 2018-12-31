@@ -42,6 +42,7 @@ install:
       cp "../extract-qt.qs" . ;
       env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script 'extract-qt.qs' | grep -E '(QTCI|operation)' ;
       rm 'extract-qt.qs' ;
+      choco install wixtoolset
     fi
 
 # env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script 'extract-qt.qs' ;
@@ -57,17 +58,18 @@ script:
   - cmake -D SYNERGY_ENTERPRISE=ON ..
   - cmake --build .
   - echo '# tmp_debug'
-  - find -print0 | xargs -0 ls -ld
+  - echo 'find -print0 | xargs -0 ls -ld'
   - echo '# make linux installer'
   - if [[ $TRAVIS_OS_NAME = linux ]]; then
       echo '# create debian/changelog from git history' ;
       cd .. && gbp dch --ignore-branch ;
       echo '# tmp_debug' ;
-      find -print0 | xargs -0 ls -ld ;
+      echo 'find -print0 | xargs -0 ls -ld' ;
       dpkg-buildpackage -us -uc ;
     fi
 
 after_failure:
-  - cat 'CMakeFiles/CMakeOutput.log'
-  - cd /
+  - pwd
+  - cat "$TRAVIS_BUILD_DIR/build/CMakeFiles/CMakeOutput.log"
+  - cd "$TRAVIS_BUILD_DIR"
   - find -print0 | xargs -0 ls -ld
