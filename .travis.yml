@@ -30,7 +30,7 @@ addons:
     - cmake make g++
     - libssl-dev libsodium-dev libcurl4-openssl-dev libavahi-compat-libdnssd-dev libsystemd-dev
     - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesa qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
-    - dpkg-dev git-buildpackage fakeroot
+    - dpkg-dev git-buildpackage fakeroot debhelper
 
 install:
   - if [[ "$TRAVIS_OS_NAME" = "windows" ]]; then
