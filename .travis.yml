@@ -77,7 +77,8 @@ after_failure:
   - pwd
   - mount
   - export
-  - cat "$TRAVIS_BUILD_DIR/build/CMakeFiles/CMakeOutput.log"
-  - find /c/ -xdev -type d -print0 | xargs -0 ls -ld
-  - cd "$TRAVIS_BUILD_DIR"
-  - find -print0 | xargs -0 ls -ld
+  - find /c/Qt -xdev -type d -print0 | xargs -0 ls -ld
+
+#  - cat "$TRAVIS_BUILD_DIR/build/CMakeFiles/CMakeOutput.log"
+#  - cd "$TRAVIS_BUILD_DIR"
+#  - find -print0 | xargs -0 ls -ld
