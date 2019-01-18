@@ -39,8 +39,9 @@ install:
       cd '/qt_installer/download' ;
       echo '# download Qt installer if in cache already' ;
       if ! [ -e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" ; fi ;
+      echo "# Qt downloaded. Installing...." ;
       cp "../extract-qt.qs" . ;
-      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script 'extract-qt.qs' ;
+      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script 'extract-qt.qs' ;
       choco install nuget.commandline ;
       nuget install WiX.Toolset ;
     fi
