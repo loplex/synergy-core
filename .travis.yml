@@ -38,47 +38,39 @@ install:
       cp "$qt_installer_automation_script" "/qt_installer/" ;
       cd '/qt_installer/download' ;
       echo '# download Qt installer if in cache already' ;
-      if ! [ -e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" ; fi ;
-      echo "# Qt downloaded. Installing...." ;
+      if ! [-e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" ; fi ;
       cp "../extract-qt.qs" . ;
-      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script 'extract-qt.qs' ;
+      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script 'extract-qt.qs' | grep -E '(QTCI|operation)' ;
+      rm 'extract-qt.qs' ;
       choco install nuget.commandline ;
       nuget install WiX.Toolset ;
     fi
 
-# rm '.extract-qt.qs' ;
-# env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script 'extract-qt.qs' | grep -E '(QTCI|operation)' ;
 # env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script 'extract-qt.qs' ;
 #      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script '../extract-qt.qs' ;
 #env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script "..\\$qt_installer_automation_script"
 # | grep -E '(QTCI|operation)'
-
-#      echo '# create debian/changelog from git history' ;
-#      cd .. && gbp dch --ignore-branch ;
-#      echo '# tmp_debug' ;
-#      echo 'find -print0 | xargs -0 ls -ld' ;
 
 script:
   - cd "$TRAVIS_BUILD_DIR"
   - echo '# cmake build'
   - mkdir build
   - cd build
-  - cmake --trace -DSYNERGY_ENTERPRISE=ON ..
+  - cmake -D SYNERGY_ENTERPRISE=ON ..
   - cmake --build .
   - echo '# tmp_debug'
   - echo 'find -print0 | xargs -0 ls -ld'
   - echo '# make linux installer'
   - if [[ $TRAVIS_OS_NAME = linux ]]; then
+      echo '# create debian/changelog from git history' ;
+      cd .. && gbp dch --ignore-branch ;
+      echo '# tmp_debug' ;
+      echo 'find -print0 | xargs -0 ls -ld' ;
       dpkg-buildpackage -us -uc ;
     fi
 
 after_failure:
-  - echo "!!!!!!!!!!!!!!!!!!!!!!! FAILURE debug: !!!!!!!!!!
   - pwd
-  - mount
-  - export
-  - find /c/Qt -xdev -type d -print0 | xargs -0 ls -ld
-
-#  - cat "$TRAVIS_BUILD_DIR/build/CMakeFiles/CMakeOutput.log"
-#  - cd "$TRAVIS_BUILD_DIR"
-#  - find -print0 | xargs -0 ls -ld
+  - cat "$TRAVIS_BUILD_DIR/build/CMakeFiles/CMakeOutput.log"
+  - cd "$TRAVIS_BUILD_DIR"
+  - find -print0 | xargs -0 ls -ld
