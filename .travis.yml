@@ -9,11 +9,15 @@ matrix:
   - name: windows
     os: windows
     env:
-      - CMAKE_PREFIX_PATH='C:/Qt/5.8.0/msvc2015_64'
-      - qt_installer_url="https://download.qt.io/archive/online_installers/3.0/qt-unified-windows-x86-3.0.6-online.exe"
-      - qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe'
-      - qt_installer_automation_script='extract-qt.qs'
-      - qt_installer_packages='qt.58.win64_msvc2015_64'
+      - CMAKE_PREFIX_PATH='C:/Qt/5.9.0/msvc2015_64'
+#      - qt_installer_url="https://download.qt.io/archive/online_installers/3.0/qt-unified-windows-x86-3.0.6-online.exe"
+#      - qt_installer_url="http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe"
+      - qt_installer_url="https://download.qt.io/archive/online_installers/3.2/qt-unified-windows-x86-3.2.3-online.exe"
+#      - qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe'
+      - qt_installer_filename='qt-unified-windows-x86-3.2.3-online.exe'
+#      - qt_installer_filename='qt-unified-windows-x86-online.exe'
+#      - qt_installer_automation_script='extract-qt.qs'
+      - QT_INSTALLER_PACKAGES='qt.59.win64_msvc2015_64'
     cache:
       directories:
       - /c/Qt
@@ -35,13 +39,9 @@ addons:
 install:
   - if [[ "$TRAVIS_OS_NAME" = "windows" ]]; then
       mkdir -p '/qt_installer/download' ;
-      cp "$qt_installer_automation_script" "/qt_installer/" ;
-      cd '/qt_installer/download' ;
-      echo '# download Qt installer if in cache already' ;
-      if ! [-e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" ; fi ;
-      cp "../extract-qt.qs" . ;
-      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script 'extract-qt.qs' | grep -E '(QTCI|operation)' ;
-      rm 'extract-qt.qs' ;
+      echo '# download Qt installer if not already (cached)' ;
+      if ! [-e "$qt_installer_filename" ]; then cd wget --progress=bar:force:noscroll "$qt_installer_url" -O "/qt_installer/download/$qt_installer_filename" ; fi ;
+      "/qt_installer/download/$qt_installer_filename" -v --script "./extract-qt.qs" | grep -E '(QTCI|operation)' ;
       choco install nuget.commandline ;
       nuget install WiX.Toolset ;
     fi

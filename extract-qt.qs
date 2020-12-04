@@ -1,6 +1,14 @@
-var env_list_packages = installer.environmentVariable("LIST_PACKAGES");
-var env_output = installer.environmentVariable("OUTPUT");
-var env_packages = installer.environmentVariable("PACKAGES");
+// https://www.qt.io/blog/qt-online-installer-3.2.3-released
+// https://www.qt.io/blog/option-to-provide-anonymous-usage-statistics-enabled
+
+
+//var env_list_packages = installer.environmentVariable("LIST_PACKAGES");
+var env_list_packages = false;
+//var env_output = installer.environmentVariable("OUTPUT");
+var env_output = "C:\\Qt";
+//var env_packages = installer.environmentVariable("PACKAGES");
+var env_packages = installer.environmentVariable("QT_INSTALLER_PACKAGES");
+//var env_packages = "qt.59.win64_msvc2015_64";
 
 function abortInstaller()
 {
@@ -74,18 +82,35 @@ Controller.prototype.WelcomePageCallback = function() {
         gui.clickButton(buttons.NextButton);
     });
 }
+Controller.prototype.ObligationsPageCallback = function() {
+    log("Obligations Page");
+    var page = gui.pageWidgetByObjectName("ObligationsPage");
+    page.obligationsAgreement.setChecked(true);
+    var individualCheckbox = gui.findChild(page, "IndividualPerson")
+    if (individualCheckbox) {
+        individualCheckbox.checked = true;
+    }
+    page.completeChanged();
+    gui.clickButton(buttons.NextButton);
+}
+Controller.prototype.DynamicTelemetryPluginFormCallback = function() {
+    log("Telemetry Page");
+    var page = gui.pageWidgetByObjectName("DynamicTelemetryPluginForm");
+    page.statisticGroupBox.disableStatisticRadioButton.setChecked(true);
+    gui.clickButton(buttons.NextButton);
+}
 Controller.prototype.CredentialsPageCallback = function() {
 	
 	var login = installer.environmentVariable("QT_CI_LOGIN");
 	var password = installer.environmentVariable("QT_CI_PASSWORD");
 	if (login === "" || password === "") {
 		gui.clickButton(buttons.CommitButton);
-	}
-	
-    var widget = gui.currentPageWidget();
-	widget.loginWidget.EmailLineEdit.setText(login);
-	widget.loginWidget.PasswordLineEdit.setText(password);
-    gui.clickButton(buttons.CommitButton);
+	} else {
+        var widget = gui.currentPageWidget();
+	    widget.loginWidget.EmailLineEdit.setText(login);
+	    widget.loginWidget.PasswordLineEdit.setText(password);
+        gui.clickButton(buttons.CommitButton);
+    ``}
 }
 Controller.prototype.ComponentSelectionPageCallback = function() {
     log("ComponentSelectionPageCallback");
