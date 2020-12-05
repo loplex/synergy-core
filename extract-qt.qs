@@ -1,14 +1,19 @@
 // https://www.qt.io/blog/qt-online-installer-3.2.3-released
 // https://www.qt.io/blog/option-to-provide-anonymous-usage-statistics-enabled
 
+// https://wiki.qt.io/Online_Installer_4.x
+// https://github.com/qtproject/qtsdk/tree/master/packaging-tools/configurations/pkg_templates/pkg_58
+
 
 //var env_list_packages = installer.environmentVariable("LIST_PACKAGES");
 var env_list_packages = false;
+
 //var env_output = installer.environmentVariable("OUTPUT");
 var env_output = "C:\\Qt";
-//var env_packages = installer.environmentVariable("PACKAGES");
+
 var env_packages = installer.environmentVariable("QT_INSTALLER_PACKAGES");
 //var env_packages = "qt.59.win64_msvc2015_64";
+
 
 function abortInstaller()
 {
