@@ -42,6 +42,7 @@ install:
       echo '# download Qt installer if not already (cached)' ;
       if ! [-e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" -O "/qt_installer/download/$qt_installer_filename" ; fi ;
       ls -la ;
+      sed "s/jwt=/jwt=${QT_ACCOUNT_TOKEN}/" "./qtaccount.ini.stub" > "${APPDATA}/Qt/qtaccount.ini"
       "/qt_installer/download/$qt_installer_filename" -v --script "./extract-qt.qs" ;
       choco install nuget.commandline ;
       nuget install WiX.Toolset ;
