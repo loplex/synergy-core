@@ -1,7 +1,7 @@
 // https://www.qt.io/blog/qt-online-installer-3.2.3-released
 // https://www.qt.io/blog/option-to-provide-anonymous-usage-statistics-enabled
 
-// https://wiki.qt.io/Online_Installer_4.x
+// https://wiki.qt.io/Online_Installer_4.x#Installing_unattended_with_CLI
 // https://github.com/qtproject/qtsdk/tree/master/packaging-tools/configurations/pkg_templates/pkg_58
 
 
@@ -81,7 +81,8 @@ function Controller() {
 }
 Controller.prototype.WelcomePageCallback = function() {
     log("Welcome Page");
-    gui.clickButton(buttons.NextButton);
+//    gui.clickButton(buttons.NextButton);
+    gui.clickButton(buttons.NextButton, 3000);
     var widget = gui.currentPageWidget();
     widget.completeChanged.connect(function() {
         gui.clickButton(buttons.NextButton);
@@ -105,17 +106,20 @@ Controller.prototype.DynamicTelemetryPluginFormCallback = function() {
     gui.clickButton(buttons.NextButton);
 }
 Controller.prototype.CredentialsPageCallback = function() {
-	
-	var login = installer.environmentVariable("QT_CI_LOGIN");
-	var password = installer.environmentVariable("QT_CI_PASSWORD");
-	if (login === "" || password === "") {
-		gui.clickButton(buttons.CommitButton);
-	} else {
-        var widget = gui.currentPageWidget();
-	    widget.loginWidget.EmailLineEdit.setText(login);
-	    widget.loginWidget.PasswordLineEdit.setText(password);
-        gui.clickButton(buttons.CommitButton);
-    ``}
+    var page = gui.pageWidgetByObjectName("CredentialsPage");
+    page.loginWidget.EmailLineEdit.setText("MYEMAIL");
+    page.loginWidget.PasswordLineEdit.setText("MYPASSWORD");
+    gui.clickButton(buttons.NextButton);
+//	var login = installer.environmentVariable("QT_CI_LOGIN");
+//	var password = installer.environmentVariable("QT_CI_PASSWORD");
+//	if (login === "" || password === "") {
+//		gui.clickButton(buttons.CommitButton);
+//	} else {
+//        var widget = gui.currentPageWidget();
+//	    widget.loginWidget.EmailLineEdit.setText(login);
+//	    widget.loginWidget.PasswordLineEdit.setText(password);
+//        gui.clickButton(buttons.CommitButton);
+//    }
 }
 Controller.prototype.ComponentSelectionPageCallback = function() {
     log("ComponentSelectionPageCallback");
