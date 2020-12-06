@@ -38,12 +38,13 @@ addons:
 
 install:
   - if [[ "$TRAVIS_OS_NAME" = "windows" ]]; then
+      set -x ;
       mkdir -p '/qt_installer/download' ;
       echo '# download Qt installer if not already (cached)' ;
       if ! [ -e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" -O "/qt_installer/download/$qt_installer_filename" ; fi ;
       ls -la ;
-      mkdir "${APPDATA}\\Qt"
-      sed "s/jwt=/jwt=${QT_ACCOUNT_TOKEN}/" "./qtaccount.ini.stub" > "${APPDATA}\\Qt\\qtaccount.ini"
+      mkdir -p "${APPDATA}\\Qt" ;
+      sed "s/jwt=/jwt=${QT_ACCOUNT_TOKEN}/" "./qtaccount.ini.stub" > "${APPDATA}\\Qt\\qtaccount.ini" ;
       "/qt_installer/download/$qt_installer_filename" -v --script "./extract-qt.qs" ;
       choco install nuget.commandline ;
       nuget install WiX.Toolset ;
