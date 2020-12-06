@@ -11,7 +11,7 @@
         <?define ProgramFilesFolder="ProgramFiles64Folder" ?>
         <?define PlatformSimpleName="64-bit" ?>
         <?define UpgradeGuid="E8A4FA54-14B9-4FD1-8E00-7BC46555FDA0" ?>
-        <?define QtPath="C:\Qt\Qt$(var.QtVersion)\$(var.QtVersion)\msvc2015_64" ?>
+        <?define QtPath="C:\Qt\$(var.QtVersion)\msvc2015_64" ?>
     <?else ?>
         <?define ProgramFilesFolder="ProgramFilesFolder" ?>
         <?define PlatformSimpleName="32-bit" ?>
