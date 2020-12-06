@@ -9,12 +9,12 @@ matrix:
   - name: windows
     os: windows
     env:
-      - CMAKE_PREFIX_PATH='C:/Qt/5.9/msvc2015_64'
+      - CMAKE_PREFIX_PATH='C:/Qt/5.9.5/msvc2015_64'
 #      - qt_installer_url="http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe"
 #      - qt_installer_filename='qt-unified-windows-x86-online.exe'
       - qt_installer_url="https://download.qt.io/archive/online_installers/3.2/qt-unified-windows-x86-3.2.3-online.exe"
       - qt_installer_filename='qt-unified-windows-x86-3.2.3-online.exe'
-      - QT_INSTALLER_PACKAGES='qt.59.win64_msvc2015_64'
+      - QT_INSTALLER_PACKAGES='qt.595.win64_msvc2015_64'
     cache:
       directories:
       - /c/Qt

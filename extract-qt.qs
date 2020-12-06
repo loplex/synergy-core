@@ -12,7 +12,7 @@ var env_list_packages = false;
 var env_output = "C:\\Qt";
 
 var env_packages = installer.environmentVariable("QT_INSTALLER_PACKAGES");
-//var env_packages = "qt.59.win64_msvc2015_64";
+//var env_packages = "qt.595.win64_msvc2015_64";
 
 
 function abortInstaller()
