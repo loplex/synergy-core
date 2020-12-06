@@ -83,10 +83,10 @@ Controller.prototype.WelcomePageCallback = function() {
     log("Welcome Page");
 //    gui.clickButton(buttons.NextButton);
     gui.clickButton(buttons.NextButton, 3000);
-    var widget = gui.currentPageWidget();
-    widget.completeChanged.connect(function() {
-        gui.clickButton(buttons.NextButton);
-    });
+//    var widget = gui.currentPageWidget();
+//    widget.completeChanged.connect(function() {
+//        gui.clickButton(buttons.NextButton);
+//    });
 }
 Controller.prototype.ObligationsPageCallback = function() {
     log("Obligations Page");
@@ -107,8 +107,8 @@ Controller.prototype.DynamicTelemetryPluginFormCallback = function() {
 }
 Controller.prototype.CredentialsPageCallback = function() {
     var page = gui.pageWidgetByObjectName("CredentialsPage");
-    page.loginWidget.EmailLineEdit.setText("MYEMAIL");
-    page.loginWidget.PasswordLineEdit.setText("MYPASSWORD");
+//    page.loginWidget.EmailLineEdit.setText("MYEMAIL");
+//    page.loginWidget.PasswordLineEdit.setText("MYPASSWORD");
     gui.clickButton(buttons.NextButton);
 //	var login = installer.environmentVariable("QT_CI_LOGIN");
 //	var password = installer.environmentVariable("QT_CI_PASSWORD");
