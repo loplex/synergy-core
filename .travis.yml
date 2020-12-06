@@ -10,13 +10,10 @@ matrix:
     os: windows
     env:
       - CMAKE_PREFIX_PATH='C:/Qt/5.9.0/msvc2015_64'
-#      - qt_installer_url="https://download.qt.io/archive/online_installers/3.0/qt-unified-windows-x86-3.0.6-online.exe"
 #      - qt_installer_url="http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe"
-      - qt_installer_url="https://download.qt.io/archive/online_installers/3.2/qt-unified-windows-x86-3.2.3-online.exe"
-#      - qt_installer_filename='qt-unified-windows-x86-3.0.6-online.exe'
-      - qt_installer_filename='qt-unified-windows-x86-3.2.3-online.exe'
 #      - qt_installer_filename='qt-unified-windows-x86-online.exe'
-#      - qt_installer_automation_script='extract-qt.qs'
+      - qt_installer_url="https://download.qt.io/archive/online_installers/3.2/qt-unified-windows-x86-3.2.3-online.exe"
+      - qt_installer_filename='qt-unified-windows-x86-3.2.3-online.exe'
       - QT_INSTALLER_PACKAGES='qt.59.win64_msvc2015_64'
     cache:
       directories:
@@ -44,16 +41,11 @@ install:
       if ! [ -e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" -O "/qt_installer/download/$qt_installer_filename" ; fi ;
       ls -la ;
       mkdir -p "${APPDATA}\\Qt" ;
-      sed "s/jwt=/jwt=${QT_ACCOUNT_TOKEN}/" "./qtaccount.ini.stub" > "${APPDATA}\\Qt\\qtaccount.ini" ;
+      "./qtaccount_ini_gen.sh" > "${APPDATA}\\Qt\\qtaccount.ini" ;
       "/qt_installer/download/$qt_installer_filename" -v --script "./extract-qt.qs" ;
       choco install nuget.commandline ;
       nuget install WiX.Toolset ;
     fi
-
-# env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script 'extract-qt.qs' ;
-#      env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" --script '../extract-qt.qs' ;
-#env OUTPUT='C:/Qt' PACKAGES="$qt_installer_packages" "./$qt_installer_filename" -v --script "..\\$qt_installer_automation_script"
-# | grep -E '(QTCI|operation)'
 
 script:
   - cd "$TRAVIS_BUILD_DIR"

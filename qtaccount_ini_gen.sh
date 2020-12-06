@@ -1,3 +1,5 @@
+echo "
 [QtAccount]
 email=lop.spm@seznam.cz
-jwt=
+jwt=$QT_ACCOUNT_TOKEN
+"
