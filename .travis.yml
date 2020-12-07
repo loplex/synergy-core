@@ -14,7 +14,8 @@ matrix:
 #      - qt_installer_filename='qt-unified-windows-x86-online.exe'
       - qt_installer_url="https://download.qt.io/archive/online_installers/3.2/qt-unified-windows-x86-3.2.3-online.exe"
       - qt_installer_filename='qt-unified-windows-x86-3.2.3-online.exe'
-      - QT_INSTALLER_PACKAGES='qt.595.win64_msvc2015_64'
+      - QT_INSTALLER_DIR='C:\Qt'
+      - QT_INSTALLER_PACKAGES='qt.qt5.599.win64_msvc2015_64'
     cache:
       directories:
       - /c/Qt

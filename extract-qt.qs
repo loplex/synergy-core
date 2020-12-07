@@ -5,14 +5,17 @@
 // https://github.com/qtproject/qtsdk/tree/master/packaging-tools/configurations/pkg_templates/pkg_58
 
 
-//var env_list_packages = installer.environmentVariable("LIST_PACKAGES");
-var env_list_packages = false;
+var env_output = installer.environmentVariable("QT_INSTALLER_DIR");
+if (!env_output) {
+	env_output = "C:\\Qt";
+}
 
-//var env_output = installer.environmentVariable("OUTPUT");
-var env_output = "C:\\Qt";
+var env_list_packages = installer.environmentVariable("QT_INSTALLER_LIST_PACKAGES");
+if (env_list_packages) {
+	env_output = "C:\\QtTemp";
+}
 
 var env_packages = installer.environmentVariable("QT_INSTALLER_PACKAGES");
-//var env_packages = "qt.595.win64_msvc2015_64";
 
 
 function abortInstaller()
@@ -106,10 +109,13 @@ Controller.prototype.DynamicTelemetryPluginFormCallback = function() {
     gui.clickButton(buttons.NextButton);
 }
 Controller.prototype.CredentialsPageCallback = function() {
-    var page = gui.pageWidgetByObjectName("CredentialsPage");
+    log("CredentialsPageCallback");
+    gui.clickButton(buttons.NextButton);
+
+//    var page = gui.pageWidgetByObjectName("CredentialsPage");
 //    page.loginWidget.EmailLineEdit.setText("MYEMAIL");
 //    page.loginWidget.PasswordLineEdit.setText("MYPASSWORD");
-    gui.clickButton(buttons.NextButton);
+//    gui.clickButton(buttons.NextButton);
 //	var login = installer.environmentVariable("QT_CI_LOGIN");
 //	var password = installer.environmentVariable("QT_CI_PASSWORD");
 //	if (login === "" || password === "") {
@@ -130,7 +136,7 @@ Controller.prototype.ComponentSelectionPageCallback = function() {
       for (var i = 0 ; i < components.length ;i++) {
           packages.push(components[i].name);
       }
-      log(packages.join(" "));
+      log(packages.join("\n"));
     }
       
     if (env_list_packages) {
