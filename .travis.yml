@@ -53,7 +53,7 @@ script:
   - echo '# cmake build'
   - mkdir build
   - cd build
-  - cmake -D SYNERGY_ENTERPRISE=ON ..
+  - cmake -DSYNERGY_ENTERPRISE=ON ..
   - cmake --build .
   - echo '# tmp_debug'
   - echo 'find -print0 | xargs -0 ls -ld'
