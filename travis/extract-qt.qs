@@ -5,17 +5,17 @@
 // https://github.com/qtproject/qtsdk/tree/master/packaging-tools/configurations/pkg_templates/pkg_58
 
 
-var env_output = installer.environmentVariable("QT_INSTALLER_DIR");
+var env_output = installer.environmentVariable("QT_INSTALL_DIR");
 if (!env_output) {
 	env_output = "C:\\Qt";
 }
 
-var env_list_packages = installer.environmentVariable("QT_INSTALLER_LIST_PACKAGES");
+var env_list_packages = installer.environmentVariable("QT_INSTALL_ONLY_LIST_PACKAGES");
 if (env_list_packages) {
 	env_output = "C:\\QtTemp";
 }
 
-var env_packages = installer.environmentVariable("QT_INSTALLER_PACKAGES");
+var env_packages = installer.environmentVariable("QT_INSTALL_PACKAGES");
 
 
 function abortInstaller()

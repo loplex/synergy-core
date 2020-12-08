@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "
 [QtAccount]
 email=lop.spm@seznam.cz
