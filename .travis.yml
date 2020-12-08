@@ -12,12 +12,13 @@ matrix:
       - CMAKE_PREFIX_PATH='C:\Qt\5.9.9\msvc2015_64'
 #      - qt_installer_url="http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe"
 #      - qt_installer_filename='qt-unified-windows-x86-online.exe'
-      - qt_installer_url='https://download.qt.io/archive/online_installers/3.2/qt-unified-windows-x86-3.2.3-online.exe'
+      - qt_installer_url='`https://download.qt.io/archive/online_installers/3.2/qt-unified-windows-x86-3.2.3-online.exe`'
       - qt_installer_download_dir='/c/qt_installer'
       - qt_installer_filename='qt-unified-windows-x86-3.2.3-online.exe'
       - QT_INSTALLER_DIR='C:\Qt'
       - QT_INSTALLER_PACKAGES='qt.qt5.599.win64_msvc2015_64'
       - qt_msvc2015_dir='/c/Qt/5.9.9/msvc2015_64'
+      - ARCH=" Win64"
     cache:
       directories:
       - /c/Qt
@@ -43,7 +44,9 @@ install:
       echo '# download Qt installer if not already (cached)' ;
       qt_installer_download_dir='/c/qt_installer' ;
       mkdir -p "$qt_installer_download_dir" ;
-      if ! [ -e "$qt_installer_filename" ]; then wget --progress=bar:force:noscroll "$qt_installer_url" -O "${qt_installer_download_dir}/${qt_installer_filename}" ; fi ;
+      if ! [ -e "$qt_installer_filename" ]; then
+        wget --progress=dot:giga "$qt_installer_url" -O "${qt_installer_download_dir}/${qt_installer_filename}" ;
+      fi ;
 
       if ! [ -d "$qt_msvc2015_dir" ]; then
         echo '# preparing Qt account login' ;
@@ -51,10 +54,8 @@ install:
         "./qtaccount_ini_gen.sh" > "${APPDATA}\\Qt\\qtaccount.ini" ;
 
         echo '# installing packages using Qt online installer' ;
-        "${qt_installer_download_dir}/${qt_installer_filename}" -v --script "./extract-qt.qs" ;
+        "${qt_installer_download_dir}/${qt_installer_filename}" -v --script "./extract-qt.qs" | grep -v 'addDownloadable ' ;
       fi ;
-
-      ls -la ;
 
       choco install nuget.commandline ;
       nuget install WiX.Toolset ;
