@@ -63,18 +63,17 @@ script:
   - echo '# cmake build'
   - mkdir build
   - cd build
-  - cmake -DSYNERGY_ENTERPRISE=ON -A x64 -DCMAKE_VERBOSE_MAKEFILE=ON ..
+  - cmake -DSYNERGY_ENTERPRISE=ON -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_VERBOSE_MAKEFILE=ON ..
   - cmake --build .
   - echo '# tmp_debug'
-  - echo 'find -print0 | xargs -0 ls -ld'
-  - echo '# make linux installer'
   - if [[ $TRAVIS_OS_NAME = linux ]]; then
       echo '# create debian/changelog from git history' ;
       cd .. && gbp dch --ignore-branch ;
-      echo '# tmp_debug' ;
-      echo 'find -print0 | xargs -0 ls -ld' ;
+      echo '# make linux installer' ;
       dpkg-buildpackage -us -uc ;
     fi
+  - echo '# tmp_debug'
+  - find . -print0 | xargs -0 ls -ld
 
 after_failure:
   - pwd
