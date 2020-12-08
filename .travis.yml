@@ -65,7 +65,7 @@ script:
   - echo '# cmake build'
   - mkdir build
   - cd build
-  - cmake -DSYNERGY_ENTERPRISE=ON -Thost=x64 -DCMAKE_VERBOSE_MAKEFILE=ON ..
+  - cmake -DSYNERGY_ENTERPRISE=ON -T host=x64 -A x64 -DCMAKE_VERBOSE_MAKEFILE=ON ..
   - cmake --build .
   - echo '# tmp_debug'
   - echo 'find -print0 | xargs -0 ls -ld'
