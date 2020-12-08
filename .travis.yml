@@ -38,8 +38,6 @@ addons:
 
 install:
   - if [[ "$TRAVIS_OS_NAME" = "windows" ]]; then
-      set -x ;
-
       echo '# download Qt installer if not already (cached)' ;
       qt_installer_download_dir='/c/qt_installer' ;
       mkdir -p "$qt_installer_download_dir" ;
@@ -65,7 +63,7 @@ script:
   - echo '# cmake build'
   - mkdir build
   - cd build
-  - cmake -DSYNERGY_ENTERPRISE=ON -T host=x64 -A x64 -DCMAKE_VERBOSE_MAKEFILE=ON ..
+  - cmake -DSYNERGY_ENTERPRISE=ON -A x64 -DCMAKE_VERBOSE_MAKEFILE=ON ..
   - cmake --build .
   - echo '# tmp_debug'
   - echo 'find -print0 | xargs -0 ls -ld'
