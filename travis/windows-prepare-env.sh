@@ -8,6 +8,7 @@ qt_installer_path='/c/qt_installer/qt-unified-windows-x86-3.2.3-online.exe'
 
 function qt_account() {
   echo '# setting Qt account login'
+  echo "$QT_ACCOUNT_TOKEN" |wc -c
   qt_account_ini_path="${APPDATA}\\Qt\\qtaccount.ini"
   mkdir -p "$(dirname "$qt_account_ini_path")"
   ./qtaccount_ini_gen.sh > "$qt_account_ini_path"
