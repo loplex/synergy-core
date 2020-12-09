@@ -1,11 +1,21 @@
 language: cpp
 
-os:
-  - windows
-  - linux
+_script_common:
+  - &script_common
+    echo '# cmake generator' &&
+    mkdir build && cd build &&
+    cmake -DSYNERGY_ENTERPRISE=ON -DCMAKE_VERBOSE_MAKEFILE=ON .. &&
+    echo '# cmake build' &&
+    cmake --build . &&
+    cd ..
 
+_script_common_last:
+  - &script_common_last
+    echo "# files $TRAVIS_BUILD_DIR/** :" ;
+    cd "$TRAVIS_BUILD_DIR" ;
+    find . -print0 | xargs -0 ls -ld
 
-matrix:
+jobs:
   include:
 
     - name: windows
@@ -22,6 +32,9 @@ matrix:
         directories:
           - /c/Qt
           - /c/qt_installer
+      script:
+        - *script_common
+        - *script_common_last
 
     - name: linux
       os: linux
@@ -37,18 +50,9 @@ matrix:
             - qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
             - dpkg-dev git-buildpackage fakeroot debhelper
       script:
+        - *script_common
         - pwd && cd .. && ./travis/linux-create-deb-package.sh
-
-
-script:
-  - echo '# cmake generator' &&
-    mkdir build && cd build &&
-    cmake -DSYNERGY_ENTERPRISE=ON -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_VERBOSE_MAKEFILE=ON .. &&
-    echo '# cmake build' &&
-    cmake --build .
-  - echo "# files $TRAVIS_BUILD_DIR/** :" ;
-    cd "$TRAVIS_BUILD_DIR" ;
-    find . -print0 | xargs -0 ls -ld
+        - *script_common_last
 
 
 after_failure:
