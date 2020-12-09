@@ -29,7 +29,7 @@ function qt_prefix() {
     qt_installer
     echo '# installing Qt prerequisites using Qt online installer'
     "$qt_installer_path" -v --script './extract-qt.qs' \
-      | grep -v 'addDownloadable '
+      | grep -Ev "( Url is: |addDownloadable )"
   else
     echo '# installed Qt prerequisites cached'
   fi
