@@ -2,14 +2,19 @@ language: cpp
 
 _script_common_last:
   - &script_common_last
-    echo "# files $TRAVIS_BUILD_DIR/** :" ;
+
+    echo "# pwd:" ;
     pwd ;
+
+    echo "# files $TRAVIS_BUILD_DIR/** :" ;
     cd "$TRAVIS_BUILD_DIR" ;
     find . -print0 | xargs -0 ls -ld
+
 
 env:
   global:
     - SYNERGY_ENTERPRISE=ON
+
 
 jobs:
   include:
@@ -29,11 +34,15 @@ jobs:
         directories:
           - /c/Qt
           - /c/qt_installer
+
       script:
-        - echo '# cmake generator' &&
-          cmake .. &&
-          echo '# cmake build' &&
-          cmake --build .
+        - mkdir build && cd $_
+
+        - echo '# cmake generator'
+        - cmake ..
+
+        - echo '# cmake build'
+        - cmake --build .
 
         - *script_common_last
 
@@ -51,9 +60,19 @@ jobs:
             - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesa
             - qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
             - dpkg-dev git-buildpackage fakeroot debhelper
+
       script:
-        - ./travis/linux-create-deb-package.sh
+        - echo '# create debian/changelog from git history'
+        - gbp dch --ignore-branch
+
+        - echo '# make linux DEB package'
+        - dpkg-buildpackage -us -uc
+
         - *script_common_last
+
+
+after_script:
+  - echo "####after_script####"
 
 
 after_failure:

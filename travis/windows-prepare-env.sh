@@ -8,11 +8,16 @@ qt_installer_url='https://download.qt.io/archive/online_installers/3.2/qt-unifie
 qt_installer_path='/c/qt_installer/qt-unified-windows-x86-3.2.3-online.exe'
 qt_account_ini_path="${APPDATA}/Qt/qtaccount.ini"
 qt_installer_control_script='./extract-qt.qs'
+qt_account_username='lop.spm@seznam.cz'
 
 function qt_account_set() {
   echo '# setting Qt account login'
   mkdir -p "$(dirname "$qt_account_ini_path")"
-  ./qtaccount_ini_gen.sh >"$qt_account_ini_path"
+  printf '%s\n' \
+    '[QtAccount]' \
+    "email=$qt_account_username" \
+    "jwt=$QT_ACCOUNT_TOKEN" \
+      > "$qt_account_ini_path"
 }
 
 function qt_online_installer_download() {
@@ -29,6 +34,7 @@ function qt_prefix_install() {
   if ! [[ -d "$CMAKE_PREFIX_PATH" ]]; then
     qt_account_set
     qt_online_installer_download
+
     echo '# installing Qt prerequisites using Qt online installer'
     mkdir -p "$(dirname "$CMAKE_PREFIX_PATH")"
     "$qt_installer_path" -v --script "$qt_installer_control_script" \
@@ -38,10 +44,10 @@ function qt_prefix_install() {
   fi
 }
 
-function wix() {
-  choco install nuget.commandline
-  nuget install WiX.Toolset
-}
+#function wix() {
+#  choco install nuget.commandline
+#  nuget install WiX.Toolset
+#}
 
 qt_prefix_install
 #wix
