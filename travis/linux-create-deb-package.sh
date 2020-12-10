@@ -1,6 +1,5 @@
 #!/bin/bash
-set -e
-set -v
+set -ev
 
 echo "# $0:"
 

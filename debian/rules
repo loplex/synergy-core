@@ -3,3 +3,5 @@
 %:
 	dh $@ --buildsystem=cmake --builddirectory=build -Pbuild/debian --parallel
 
+#override_dh_auto_configure:
+#	dh_auto_configure -- -DSYNERGY_ENTERPRISE
