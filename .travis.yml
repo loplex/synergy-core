@@ -32,7 +32,6 @@ jobs:
       script:
         - echo '# cmake generator' &&
           cmake .. &&
-
           echo '# cmake build' &&
           cmake --build .
 
