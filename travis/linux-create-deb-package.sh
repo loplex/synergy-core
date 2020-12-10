@@ -1,5 +1,7 @@
 #!/bin/bash
-set -ev
+set -e
+set -v
+
 echo "# $0:"
 
 echo '# create debian/changelog from git history'
