@@ -1,19 +1,10 @@
 language: cpp
 
-_script_common_last:
-  - &script_common_last
-
-    echo "# pwd:" ;
-    pwd ;
-
-    echo "# files $TRAVIS_BUILD_DIR/** :" ;
-    cd "$TRAVIS_BUILD_DIR" ;
-    find . -print0 | xargs -0 ls -ld
-
 
 env:
   global:
     - SYNERGY_ENTERPRISE=ON
+    - aho=ksdd
 
 
 jobs:
@@ -29,22 +20,27 @@ jobs:
         - CMAKE_GENERATOR_TOOLSET='v140,host=x64'
         - CMAKE_GENERATOR_PLATFORM='x64'
       install:
-        - ./travis/windows-prepare-env.sh
+        - ./travis/windows-install-qt.sh
       cache:
         directories:
-          - /c/Qt
-          - /c/qt_installer
+          - "$QT_INSTALL_DIR"
+          - "$CMAKE_PREFIX_PATH"
 
       script:
-        - mkdir build && cd $_
+        - echo '##### script ##### (jobs-include-windows-script) '
+
+        - echo 'du -hs "c:\\Qt\\*"'
+        - du -hs "c:\\Qt\\*"
+        - echo 'du -hs ~/*'
+        - du -hs ~/*
+
+        - mkdir 'build' && cd $_
 
         - echo '# cmake generator'
         - cmake ..
 
         - echo '# cmake build'
         - cmake --build .
-
-        - *script_common_last
 
 
     - name: linux
@@ -62,22 +58,36 @@ jobs:
             - dpkg-dev git-buildpackage fakeroot debhelper
 
       script:
+        - echo '##### script ##### (jobs-include-linux-script) '
+
         - echo '# create debian/changelog from git history'
         - gbp dch --ignore-branch
 
         - echo '# make linux DEB package'
         - dpkg-buildpackage -us -uc
 
-        - *script_common_last
-
 
 after_script:
-  - echo "####after_script####"
+  - echo '##### after_script #####'
+
+  - echo 'du -hs "c:\\Qt\\*"'
+  - du -hs "c:\\Qt\\*"
+  - echo 'du -hs ~/*'
+  - du -hs ~/*
+
+  - echo -n "# PWD=$PWD"
+  - echo -n "# TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR"
+
+  - echo "# files $TRAVIS_BUILD_DIR/**:" ;
+    find "$TRAVIS_BUILD_DIR" -print0 | xargs -0 ls -ld
 
 
 after_failure:
-  - echo '# after_failure:'
-  - echo '# pwd:'
-  - pwd
-  - echo "# $TRAVIS_BUILD_DIR/build/CMakeFiles/CMakeOutput.log :"
-  - cat "$TRAVIS_BUILD_DIR/build/CMakeFiles/CMakeOutput.log"
+  - echo '##### after_failure #####'
+
+  - echo -n "# PWD=$PWD"
+  - echo -n "# TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR"
+
+  - cmake_output_log="${TRAVIS_BUILD_DIR}/build/CMakeFiles/CMakeOutput.log" ;
+    echo "# $cmake_output_log :" ;
+    cat "$cmake_output_log"

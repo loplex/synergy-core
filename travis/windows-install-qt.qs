@@ -4,22 +4,17 @@
 // https://wiki.qt.io/Online_Installer_4.x#Installing_unattended_with_CLI
 // https://github.com/qtproject/qtsdk/tree/master/packaging-tools/configurations/pkg_templates/pkg_58
 
-
-var env_output = installer.environmentVariable("QT_INSTALL_DIR");
-if (!env_output) {
-	env_output = "C:\\Qt";
-}
+var DEFAULT_QT_INSTALL_DIR = "C:\\Qt";
+var DEFAULT_QT_TMP_INSTALL_DIR = "C:\\QtTemp";  // used in "only-list packages" (QT_INSTALL_ONLY_LIST_PACKAGES) mode
 
 var env_list_packages = installer.environmentVariable("QT_INSTALL_ONLY_LIST_PACKAGES");
-if (env_list_packages) {
-	env_output = "C:\\QtTemp";
-}
-
+var env_output = installer.environmentVariable("QT_INSTALL_DIR")
+    ?? (env_list_packages ? DEFAULT_QT_TMP_INSTALL_DIR : DEFAULT_QT_INSTALL_DIR);
 var env_packages = installer.environmentVariable("QT_INSTALL_PACKAGES");
+var env_login = installer.environmentVariable("QT_ACCOUNT_LOGIN");
+var env_password = installer.environmentVariable("QT_ACCOUNT_PASSWORD");
 
-
-function abortInstaller()
-{
+function abortInstaller() {
     installer.setDefaultPageVisible(QInstaller.Introduction, false);
     installer.setDefaultPageVisible(QInstaller.TargetDirectory, false);
     installer.setDefaultPageVisible(QInstaller.ComponentSelection, false);
@@ -40,10 +35,12 @@ function abortInstaller()
     abortText += "</ul>";
     installer.setValue("FinishedText", abortText);
 }
+
 function log() {
     var msg = ["QTCI: "].concat([].slice.call(arguments));
     console.log(msg.join(" "));
 }
+
 function printObject(object) {
 	var lines = [];
 	for (var i in object) {
@@ -51,11 +48,14 @@ function printObject(object) {
 	}
 	log(lines.join(","));
 }
+
+
 var status = {
 	widget: null,
 	finishedPageVisible: false,
 	installationFinished: false
 }
+
 function tryFinish() {
 	if (status.finishedPageVisible && status.installationFinished) {
         if (status.widget.LaunchQtCreatorCheckBoxForm) {
@@ -70,6 +70,7 @@ function tryFinish() {
 	    gui.clickButton(buttons.FinishButton);
 	}
 }
+
 function Controller() {
     installer.installationFinished.connect(function() {
 		status.installationFinished = true;
@@ -82,6 +83,7 @@ function Controller() {
     // Allow to cancel installation for arguments --list-packages
     installer.setMessageBoxAutomaticAnswer("cancelInstallation", QMessageBox.Yes);
 }
+
 Controller.prototype.WelcomePageCallback = function() {
     log("Welcome Page");
 //    gui.clickButton(buttons.NextButton);
@@ -91,6 +93,7 @@ Controller.prototype.WelcomePageCallback = function() {
 //        gui.clickButton(buttons.NextButton);
 //    });
 }
+
 Controller.prototype.ObligationsPageCallback = function() {
     log("Obligations Page");
     var page = gui.pageWidgetByObjectName("ObligationsPage");
@@ -102,33 +105,26 @@ Controller.prototype.ObligationsPageCallback = function() {
     page.completeChanged();
     gui.clickButton(buttons.NextButton);
 }
+
 Controller.prototype.DynamicTelemetryPluginFormCallback = function() {
-    log("Telemetry Page");
+    log("DynamicTelemetryPluginFormCallback");
     var page = gui.pageWidgetByObjectName("DynamicTelemetryPluginForm");
     page.statisticGroupBox.disableStatisticRadioButton.setChecked(true);
     gui.clickButton(buttons.NextButton);
 }
-Controller.prototype.CredentialsPageCallback = function() {
-    log("CredentialsPageCallback");
-    gui.clickButton(buttons.NextButton);
 
-//    var page = gui.pageWidgetByObjectName("CredentialsPage");
-//    page.loginWidget.EmailLineEdit.setText("MYEMAIL");
-//    page.loginWidget.PasswordLineEdit.setText("MYPASSWORD");
-//    gui.clickButton(buttons.NextButton);
-//	var login = installer.environmentVariable("QT_CI_LOGIN");
-//	var password = installer.environmentVariable("QT_CI_PASSWORD");
-//	if (login === "" || password === "") {
-//		gui.clickButton(buttons.CommitButton);
-//	} else {
-//        var widget = gui.currentPageWidget();
-//	    widget.loginWidget.EmailLineEdit.setText(login);
-//	    widget.loginWidget.PasswordLineEdit.setText(password);
-//        gui.clickButton(buttons.CommitButton);
-//    }
+Controller.prototype.CredentialsPageCallback = function() {
+    log("Credentials Page");
+    if (env_login || env_password) {
+        var widget = gui.currentPageWidget();
+        widget.loginWidget.EmailLineEdit.setText(login);
+        widget.loginWidget.PasswordLineEdit.setText(password);
+    }
+    gui.clickButton(buttons.CommitButton);
 }
+
 Controller.prototype.ComponentSelectionPageCallback = function() {
-    log("ComponentSelectionPageCallback");
+    log("Component Selection Page");
     function list_packages() {
       var components = installer.components();
       log("Available components: " + components.length);
@@ -182,21 +178,25 @@ Controller.prototype.ComponentSelectionPageCallback = function() {
     }
     gui.clickButton(buttons.NextButton, 3000);
 }
+
 Controller.prototype.IntroductionPageCallback = function() {
     log("Introduction Page");
     log("Retrieving meta information from remote repository");
     gui.clickButton(buttons.NextButton);
 }
+
 Controller.prototype.TargetDirectoryPageCallback = function() {
+    log("Target Directory Page");
     log("Set target installation page: " + env_output);
     var widget = gui.currentPageWidget();
     if (widget != null) {
         widget.TargetDirectoryLineEdit.setText(env_output);
     }
-    
     gui.clickButton(buttons.NextButton);
 }
+
 Controller.prototype.LicenseAgreementPageCallback = function() {
+    log("License Agreement Page");
     log("Accept license agreement");
     var widget = gui.currentPageWidget();
     if (widget != null) {
@@ -204,27 +204,30 @@ Controller.prototype.LicenseAgreementPageCallback = function() {
     }
     gui.clickButton(buttons.NextButton);
 }
+
 Controller.prototype.StartMenuDirectoryPageCallback = function() {
+    log("Start Menu Directory Page");
     log("Confirm Start Menu shortcuts");
     gui.clickButton(buttons.NextButton, 500);
 }
+
 Controller.prototype.ReadyForInstallationPageCallback = function() {
-    log("Ready to install");
+    log("Ready For Installation Page");
     // Bug? If commit button pressed too quickly finished callback might not show the checkbox to disable running qt creator
     // Behaviour started around 5.10. You don't actually have to press this button at all with those versions, even though gui.isButtonEnabled() returns true.
-    
     gui.clickButton(buttons.CommitButton, 200);
 }
+
 Controller.prototype.PerformInstallationPageCallback = function() {
-    log("PerformInstallationPageCallback");
+    log("Perform Installation Page");
     gui.clickButton(buttons.CommitButton);
 }
+
 Controller.prototype.FinishedPageCallback = function() {
-    log("FinishedPageCallback");
+    log("Finished Page");
     var widget = gui.currentPageWidget();
 	// Bug? Qt 5.9.5 and Qt 5.9.6 installer show finished page before the installation completed
 	// Don't press "finishButton" immediately
-    
 	status.finishedPageVisible = true;
 	status.widget = widget;
 	tryFinish();   
