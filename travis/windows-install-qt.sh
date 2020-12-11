@@ -5,7 +5,7 @@ echo "# $0:"
 cd "$(dirname "$0")"
 
 qt_installer_url='https://download.qt.io/archive/online_installers/3.2/qt-unified-windows-x86-3.2.3-online.exe'
-qt_installer_path='/c/qt_installer/qt-unified-windows-x86-3.2.3-online.exe'
+qt_installer_path="${DOWNLOADS_DIR}/qt-unified-windows-x86-3.2.3-online.exe"
 qt_account_ini_path="${APPDATA}/Qt/qtaccount.ini"
 qt_installer_control_script="$(dirname "$0")/windows-install-qt.qs"
 qt_account_login='lop.spm@seznam.cz'
