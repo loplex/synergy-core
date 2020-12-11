@@ -4,7 +4,6 @@ language: cpp
 env:
   global:
     - SYNERGY_ENTERPRISE=ON
-    - aho=ksdd
 
 
 jobs:
@@ -27,7 +26,7 @@ jobs:
           - "$CMAKE_PREFIX_PATH"
 
       script:
-        - echo '##### script ##### (jobs-include-windows-script) '
+        - echo '##### script -##### (jobs-include-windows-script) '
 
         - echo 'du -hs "c:\\Qt\\*"'
         - du -hs "c:\\Qt\\*"
@@ -58,7 +57,7 @@ jobs:
             - dpkg-dev git-buildpackage fakeroot debhelper
 
       script:
-        - echo '##### script ##### (jobs-include-linux-script) '
+        - echo '##### script -##### (jobs-include-linux-script) '
 
         - echo '# create debian/changelog from git history'
         - gbp dch --ignore-branch
@@ -68,7 +67,7 @@ jobs:
 
 
 after_script:
-  - echo '##### after_script #####'
+  - echo '##### after_script -#####'
 
   - echo 'du -hs "c:\\Qt\\*"'
   - du -hs "c:\\Qt\\*"
@@ -83,7 +82,7 @@ after_script:
 
 
 after_failure:
-  - echo '##### after_failure #####'
+  - echo '##### after_failure -#####'
 
   - echo -n "# PWD=$PWD"
   - echo -n "# TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR"
