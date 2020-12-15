@@ -129,9 +129,9 @@ Controller.prototype.ComponentSelectionPageCallback = function() {
         log("Available components: " + components.length);
         const packages = ["Packages: "];
         for (let i = 0 ; i < components.length ; i++) {
-          packages.push(components[i].name);
-      }
-      log(packages.join("\n"));
+            packages.push(components[i].name);
+        }
+        log(packages.join("\n"));
     }
       
     if (env_list_packages) {

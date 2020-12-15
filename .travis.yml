@@ -30,7 +30,7 @@ jobs:
             ./travis_windows/set-qt-account.sh
 
             export QT_INSTALL_LOG="./install-qt.out"
-            ./travis_windows/install-qt.sh
+            travis_wait 30 ./travis_windows/install-qt.sh
             echo '### Qt prerequisites installation log:'
             cat "$QT_INSTALL_LOG"
 
