@@ -15,4 +15,8 @@ echo '### installing Qt prerequisites using Qt online installer'
 mkdir -p "$QT_INSTALL_DIR"
 export QT_INSTALL_PACKAGES="$QT_INSTALL_MSVC_PACKAGE"
 cd "$(dirname "$(realpath "$0")")"
-"$(realpath "$QT_INSTALLER_PATH")" -v --script 'install-qt.qs' &> "${QT_INSTALL_LOG:-/dev/stdout}"
+if [[ -n "$QT_INSTALL_LOG" ]]; then
+  "$(realpath "$QT_INSTALLER_PATH")" -v --script 'install-qt.qs' &>"$QT_INSTALL_LOG"
+else
+  "$(realpath "$QT_INSTALLER_PATH")" -v --script 'install-qt.qs'
+fi
