@@ -20,15 +20,16 @@ jobs:
       install:
         - |
           if ! [[ -d "$CMAKE_PREFIX_PATH" ]]; then
-            QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\qt-unified-windows-x86-online.exe"
-            if ! [[ -f "$qt_installer_path" ]]; then
+            export QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\qt-unified-windows-x86-online.exe"
+            if ! [[ -f "$QT_INSTALLER_PATH" ]]; then
               ./travis_windows/download-qt-installer.sh
             else
               echo '### using cached Qt online installer'
             fi
             ./travis_windows/set-qt-account.sh
-            ./travis_windows/install-qt.sh > ./install-qt.out
-            if ! [[ -d "$CMAKE_PREFIX_PATH" ]]; then cat ./install-qt.out; fi
+            export QT_INSTALL_LOG="./install-qt.out"
+            ./travis_windows/install-qt.sh 2> ./install-qt.out
+            if ! [[ -d "$CMAKE_PREFIX_PATH" ]]; then cat "$QT_INSTALL_LOG"; fi
           else
             echo '### using cached installed Qt prerequisites'
           fi
@@ -38,6 +39,7 @@ jobs:
           - "$QT_INSTALL_DIR"
       script:
         - echo '##### script -##### (jobs-include-windows-script) '
+        - echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
 
         - echo 'du -hs ~/*' && du -hs ~/*
 
@@ -48,7 +50,12 @@ jobs:
         - |
           echo '# cmake build'
           cmake --build .
-
+      after_failure:
+        - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
+        - |
+          cmake_output_log="${TRAVIS_BUILD_DIR}/build/CMakeFiles/CMakeOutput.log"
+          echo "# $cmake_output_log :"
+          cat "$cmake_output_log"
 
     - name: linux
       os: linux
@@ -96,6 +103,3 @@ after_failure:
   - echo -n "# PWD=$PWD"
   - echo -n "# TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR"
 
-  - cmake_output_log="${TRAVIS_BUILD_DIR}/build/CMakeFiles/CMakeOutput.log" ;
-    echo "# $cmake_output_log :" ;
-    cat "$cmake_output_log"
