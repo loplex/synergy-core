@@ -18,44 +18,48 @@ jobs:
         - QT_INSTALL_MSVC_PACKAGE='qt.qt5.599.win64_msvc2015_64'
         - CMAKE_PREFIX_PATH="${QT_INSTALL_DIR}\\${QT_INSTALL_MSVC_SUBDIR}"
       install:
-        - |
+        - |-
           if ! [[ -d "$CMAKE_PREFIX_PATH" ]]; then
             export QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\qt-unified-windows-x86-online.exe"
             if ! [[ -f "$QT_INSTALLER_PATH" ]]; then
               ./travis_windows/download-qt-installer.sh
             else
-              echo '### using cached Qt online installer'
+              echo '### using cached Qt online installer';
             fi
+
             ./travis_windows/set-qt-account.sh
+
             export QT_INSTALL_LOG="./install-qt.out"
-            ./travis_windows/install-qt.sh 2> ./install-qt.out
-            if ! [[ -d "$CMAKE_PREFIX_PATH" ]]; then cat "$QT_INSTALL_LOG"; fi
+            ./travis_windows/install-qt.sh
+            echo '### Qt prerequisites installation log:'
+            cat "$QT_INSTALL_LOG"
+
           else
             echo '### using cached installed Qt prerequisites'
           fi
+        - ls -ld "$CMAKE_PREFIX_PATH"
+        - du -h -d 1 "$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH"
+        - '[[ -d "$CMAKE_PREFIX_PATH" ]]'
       cache:
         directories:
           - "$DOWNLOAD_DIR"
           - "$QT_INSTALL_DIR"
       script:
         - echo '##### script -##### (jobs-include-windows-script) '
-        - echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
-
-        - echo 'du -hs ~/*' && du -hs ~/*
-
         - mkdir 'build' && cd $_
-        - |
-          echo '# cmake generator'
-          cmake -A x64 -T host=x64 .. || travis_terminate 1;
-        - |
-          echo '# cmake build'
+        - >-
+          echo '# cmake generator';
+          cmake -A x64 -T host=x64 ..
+        - >-
+          echo '# cmake build';
           cmake --build .
       after_failure:
         - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
-        - |
-          cmake_output_log="${TRAVIS_BUILD_DIR}/build/CMakeFiles/CMakeOutput.log"
-          echo "# $cmake_output_log :"
-          cat "$cmake_output_log"
+        - echo "# CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
+        - >-
+          cmake_output_log="${TRAVIS_BUILD_DIR}/build/CMakeFiles/CMakeOutput.log";
+          echo "# $cmake_output_log :";
+          cat "$cmake_output_log";
 
     - name: linux
       os: linux
@@ -72,34 +76,22 @@ jobs:
             - dpkg-dev git-buildpackage fakeroot debhelper
       script:
         - echo '##### script -##### (jobs-include-linux-script) '
-        - |
-          echo '# create debian/changelog from git history'
+        - >-
+          echo '# create debian/changelog from git history';
           gbp dch --ignore-branch
-        - |
-          echo '# make linux DEB package'
+        - >-
+          echo '# make linux DEB package';
           dpkg-buildpackage -us -uc
 
 
 after_script:
   - echo '##### after_script -#####'
-
-  - mount
-
-  - echo 'du -hs /c/Qt/*'
-  - du -hs /c/Qt/*
-  - echo 'du -hs ~/*'
-  - du -hs ~/*
-
-  - echo -n "# PWD=$PWD"
-  - echo -n "# TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR"
-
-  - echo "# files $TRAVIS_BUILD_DIR/**:" ;
-    find "$TRAVIS_BUILD_DIR" -print0 | xargs -0 ls -ld
+  - du -h -d 3 ~
+  - find ~/* -print0 | xargs -0 ls -ld
 
 
 after_failure:
   - echo '##### after_failure -#####'
-
-  - echo -n "# PWD=$PWD"
-  - echo -n "# TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR"
-
+  - echo "# PWD=$PWD"
+  - echo "# TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR"
+  - mount
