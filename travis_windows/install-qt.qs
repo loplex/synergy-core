@@ -1,18 +1,15 @@
-// https://www.qt.io/blog/qt-online-installer-3.2.3-released
-// https://www.qt.io/blog/option-to-provide-anonymous-usage-statistics-enabled
+// defaults
+const DEFAULT_QT_INSTALL_DIR = "C:\\Qt";
+const DEFAULT_QT_TMP_INSTALL_DIR = "C:\\QtTemp";  // used in "only-list packages" (QT_INSTALL_ONLY_LIST_PACKAGES) mode
 
-// https://wiki.qt.io/Online_Installer_4.x#Installing_unattended_with_CLI
-// https://github.com/qtproject/qtsdk/tree/master/packaging-tools/configurations/pkg_templates/pkg_58
+// configuration using env. variables
+const env_list_packages = installer.environmentVariable("QT_INSTALL_ONLY_LIST_PACKAGES");
+const env_env_output = installer.environmentVariable(env_list_packages ? "QT_INSTALL_ONLY_LIST_PACKAGES_TMPDIR" : "QT_INSTALL_DIR");
+const env_output = env_env_output ? env_env_output : (env_list_packages ? DEFAULT_QT_TMP_INSTALL_DIR : DEFAULT_QT_INSTALL_DIR);
+const env_packages = installer.environmentVariable("QT_INSTALL_PACKAGES");
+const env_login = installer.environmentVariable("QT_INSTALL_ACCOUNT_LOGIN");
+const env_password = installer.environmentVariable("QT_INSTALL_ACCOUNT_PASSWORD");
 
-var DEFAULT_QT_INSTALL_DIR = "C:\\Qt";
-var DEFAULT_QT_TMP_INSTALL_DIR = "C:\\QtTemp";  // used in "only-list packages" (QT_INSTALL_ONLY_LIST_PACKAGES) mode
-
-var env_list_packages = installer.environmentVariable("QT_INSTALL_ONLY_LIST_PACKAGES");
-var env_output = installer.environmentVariable("QT_INSTALL_DIR")
-    ?? (env_list_packages ? DEFAULT_QT_TMP_INSTALL_DIR : DEFAULT_QT_INSTALL_DIR);
-var env_packages = installer.environmentVariable("QT_INSTALL_PACKAGES");
-var env_login = installer.environmentVariable("QT_ACCOUNT_LOGIN");
-var env_password = installer.environmentVariable("QT_ACCOUNT_PASSWORD");
 
 function abortInstaller() {
     installer.setDefaultPageVisible(QInstaller.Introduction, false);
@@ -22,11 +19,11 @@ function abortInstaller() {
     installer.setDefaultPageVisible(QInstaller.StartMenuSelection, false);
     installer.setDefaultPageVisible(QInstaller.PerformInstallation, false);
     installer.setDefaultPageVisible(QInstaller.LicenseCheck, false);
-    var abortText = "<font color='red' size=3>" + qsTr("Installation failed:") + "</font>";
-    var error_list = installer.value("component_errors").split(";;;");
+    let abortText = "<font color='red' size=3>" + qsTr("Installation failed:") + "</font>";
+    const error_list = installer.value("component_errors").split(";;;");
     abortText += "<ul>";
     // ignore the first empty one
-    for (var i = 0; i < error_list.length; ++i) {
+    for (let i = 0; i < error_list.length; ++i) {
         if (error_list[i] !== "") {
             log(error_list[i]);
             abortText += "<li>" + error_list[i] + "</li>"
@@ -37,24 +34,25 @@ function abortInstaller() {
 }
 
 function log() {
-    var msg = ["QTCI: "].concat([].slice.call(arguments));
+    const msg = ["QTCI: "].concat([].slice.call(arguments));
     console.log(msg.join(" "));
 }
 
 function printObject(object) {
-	var lines = [];
-	for (var i in object) {
-		lines.push([i, object[i]].join(" "));
+    const lines = [];
+    for (let i in object) {
+		// noinspection JSUnfilteredForInLoop
+        lines.push([i, object[i]].join(" "));
 	}
 	log(lines.join(","));
 }
 
 
-var status = {
-	widget: null,
-	finishedPageVisible: false,
-	installationFinished: false
-}
+const status = {
+    widget: null,
+    finishedPageVisible: false,
+    installationFinished: false
+};
 
 function tryFinish() {
 	if (status.finishedPageVisible && status.installationFinished) {
@@ -84,6 +82,7 @@ function Controller() {
     installer.setMessageBoxAutomaticAnswer("cancelInstallation", QMessageBox.Yes);
 }
 
+// noinspection JSUnusedGlobalSymbols
 Controller.prototype.WelcomePageCallback = function() {
     log("Welcome Page");
 //    gui.clickButton(buttons.NextButton);
@@ -96,9 +95,9 @@ Controller.prototype.WelcomePageCallback = function() {
 
 Controller.prototype.ObligationsPageCallback = function() {
     log("Obligations Page");
-    var page = gui.pageWidgetByObjectName("ObligationsPage");
+    const page = gui.pageWidgetByObjectName("ObligationsPage");
     page.obligationsAgreement.setChecked(true);
-    var individualCheckbox = gui.findChild(page, "IndividualPerson")
+    const individualCheckbox = gui.findChild(page, "IndividualPerson");
     if (individualCheckbox) {
         individualCheckbox.checked = true;
     }
@@ -108,7 +107,7 @@ Controller.prototype.ObligationsPageCallback = function() {
 
 Controller.prototype.DynamicTelemetryPluginFormCallback = function() {
     log("DynamicTelemetryPluginFormCallback");
-    var page = gui.pageWidgetByObjectName("DynamicTelemetryPluginForm");
+    const page = gui.pageWidgetByObjectName("DynamicTelemetryPluginForm");
     page.statisticGroupBox.disableStatisticRadioButton.setChecked(true);
     gui.clickButton(buttons.NextButton);
 }
@@ -116,7 +115,7 @@ Controller.prototype.DynamicTelemetryPluginFormCallback = function() {
 Controller.prototype.CredentialsPageCallback = function() {
     log("Credentials Page");
     if (env_login || env_password) {
-        var widget = gui.currentPageWidget();
+        const widget = gui.currentPageWidget();
         widget.loginWidget.EmailLineEdit.setText(login);
         widget.loginWidget.PasswordLineEdit.setText(password);
     }
@@ -126,10 +125,10 @@ Controller.prototype.CredentialsPageCallback = function() {
 Controller.prototype.ComponentSelectionPageCallback = function() {
     log("Component Selection Page");
     function list_packages() {
-      var components = installer.components();
-      log("Available components: " + components.length);
-      var packages = ["Packages: "];
-      for (var i = 0 ; i < components.length ;i++) {
+        const components = installer.components();
+        log("Available components: " + components.length);
+        const packages = ["Packages: "];
+        for (let i = 0 ; i < components.length ; i++) {
           packages.push(components[i].name);
       }
       log(packages.join("\n"));
@@ -144,16 +143,19 @@ Controller.prototype.ComponentSelectionPageCallback = function() {
     function trim(str) {
         return str.replace(/^ +/,"").replace(/ *$/,"");
     }
-    var widget = gui.currentPageWidget();
+
+    const widget = gui.currentPageWidget();
     var packages = trim(env_packages).split(",");
     if (packages.length > 0 && packages[0] !== "") {
         widget.deselectAll();
         var components = installer.components();
-        var allfound = true;
+        let allfound = true;
         for (var i in packages) {
-            var pkg = trim(packages[i]);
-            var found = false;
-            for (var j in components) {
+            // noinspection JSUnfilteredForInLoop
+            const pkg = trim(packages[i]);
+            let found = false;
+            for (let j in components) {
+                // noinspection JSUnfilteredForInLoop
                 if (components[j].name === pkg) {
                     found = true;
                     break;
@@ -188,7 +190,7 @@ Controller.prototype.IntroductionPageCallback = function() {
 Controller.prototype.TargetDirectoryPageCallback = function() {
     log("Target Directory Page");
     log("Set target installation page: " + env_output);
-    var widget = gui.currentPageWidget();
+    const widget = gui.currentPageWidget();
     if (widget != null) {
         widget.TargetDirectoryLineEdit.setText(env_output);
     }
@@ -198,7 +200,7 @@ Controller.prototype.TargetDirectoryPageCallback = function() {
 Controller.prototype.LicenseAgreementPageCallback = function() {
     log("License Agreement Page");
     log("Accept license agreement");
-    var widget = gui.currentPageWidget();
+    const widget = gui.currentPageWidget();
     if (widget != null) {
         widget.AcceptLicenseRadioButton.setChecked(true);
     }
@@ -225,8 +227,8 @@ Controller.prototype.PerformInstallationPageCallback = function() {
 
 Controller.prototype.FinishedPageCallback = function() {
     log("Finished Page");
-    var widget = gui.currentPageWidget();
-	// Bug? Qt 5.9.5 and Qt 5.9.6 installer show finished page before the installation completed
+    const widget = gui.currentPageWidget();
+    // Bug? Qt 5.9.5 and Qt 5.9.6 installer show finished page before the installation completed
 	// Don't press "finishButton" immediately
 	status.finishedPageVisible = true;
 	status.widget = widget;
