@@ -10,6 +10,6 @@ powershell Install-WindowsFeature Net-Framework-Core
 #choco install wixtoolset --version 3.11.1
 #choco install microsoft-build-tools
 #choco install visualstudio2015buildtools
-choco install microsoft-build-tools --version=14.0.25420.1
+choco install microsoft-build-tools --version=14.0.25420.1 --side-by-side
 which -a cinst
 cinst -y wixtoolset
