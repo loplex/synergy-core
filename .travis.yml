@@ -49,11 +49,9 @@ jobs:
         - export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:$PATH"
         - >-
           echo '# cmake generator';
-          echo cmake -A x64 -T host=x64 ..;
-          echo cmake -T 'v140,host=x64' -DCMAKE_BUILD_TYPE=Debug ..;
-          cmake .. -G "Visual Studio 14 2015" -A x64 -T v140,host=x64
-          pwd;
-          echo MSBuild.exe /p:Configuration=Debug /p:Platform=x64 synergy-core.sln
+          echo '#  -DCMAKE_BUILD_TYPE=Debug ..';
+          cmake .. -G 'Visual Studio 14 2015' -A 'x64' -T 'v140,host=x64';
+          echo '#  MSBuild.exe /p:Configuration=Debug /p:Platform=x64 synergy-core.sln'
         - >-
           echo '# cmake build';
           cmake --build .
