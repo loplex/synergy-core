@@ -44,7 +44,8 @@ jobs:
             echo '### installing Qt dependencies using Qt online installer'
             mkparentdir "$QT_INSTALL_DIR"
             "$(realpath "$QT_INSTALLER_PATH")" -v --script 'travis_windows\install-qt.qs' 2>&1 | grep 'QTCI'
-            [[ -d "$CMAKE_PREFIX_PATH" ]]
+
+            [[ -d "$CMAKE_PREFIX_PATH" ]] || { echo '### !!! Error installing Qt' >&2 ; return 1 ; }
           fi
 
         - function my_du() { du --max-depth=1 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
@@ -123,7 +124,7 @@ jobs:
 after_script:
   - echo '##### after_script -#####'
   - du -h -d 3 ~ "$TRAVIS_BUILD_DIR"
-  - find ~/* -print0 | xargs -0 ls -ld
+  - find "$TRAVIS_BUILD_DIR" -print0 | xargs -0 ls -ld
   - find 'C:\' -iname 'wix.targets' -print0 | xargs -0 ls -ld
   - find 'C:\' -iname 'msbuild.exe' -print0 | xargs -0 ls -ld
   - find 'C:\' -iname '*.msm' -print0 | xargs -0 ls -ld
