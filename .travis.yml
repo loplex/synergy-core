@@ -36,6 +36,7 @@ jobs:
           fi
         - ls -ld "$CMAKE_PREFIX_PATH"
         - du -h -d 1 "$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH"
+        - ./travis_windows/install-wix.sh
         - '[[ -d "$CMAKE_PREFIX_PATH" ]]'
       cache:
         directories:
@@ -83,8 +84,8 @@ jobs:
 
 after_script:
   - echo '##### after_script -#####'
-  - du -h -d 3 ~
-  - find ~/* -print0 | xargs -0 ls -ld
+  - du -h -d 3 ~ "$TRAVIS_BUILD_DIR"
+  - find ~ -print0 | xargs -0 ls -ld
 
 
 after_failure:
