@@ -48,7 +48,7 @@ jobs:
         - ls -l 'C:\Program Files (x86)\Microsoft Visual Studio 14.0'
         - mkdir 'build' && cd $_
 #        - echo export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:$PATH"
-        - cmd /c '..\travis_windows\build.bat'
+        - 'cmd /C ..\travis_windows\build.bat'
         - ../travis_windows/build.bat
         - >-
           echo '# cmake generator';
