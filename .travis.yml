@@ -46,19 +46,19 @@ jobs:
       script:
         - echo '##### script -##### (jobs-include-windows-script) '
         - mkdir 'build' && cd $_
-        - export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:$PATH"
+#        - echo export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:$PATH"
         - >-
           echo '# cmake generator';
-          echo '#  -DCMAKE_BUILD_TYPE=Debug ..';
-          cmake .. -G 'Visual Studio 14 2015' -A 'x64' -T 'v140,host=x64';
-          echo '#  MSBuild.exe /p:Configuration=Debug /p:Platform=x64 synergy-core.sln'
+          cmake .. -G 'Visual Studio 14 2015' -A 'x64' -T 'v140,host=x64' -D 'CMAKE_BUILD_TYPE=Debug'
+        - >-
+          "/c/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" /verbosity:diag  '/p:Configuration=Debug;Platform=x64' synergy-core.sln
         - >-
           echo '# cmake build';
           cmake --build .
         - cd installer
         - pwd
         - find
-        - MSBuild.exe /p:Configuration=Debug /p:Platform=x64
+        - MSBuild.exe '/p:Configuration=Debug;Platform=x64'
         - echo export MSBuildExtensionsPath='C:\Program Files (x86)\MSBuild'
         - echo which -a msbuild
         - echo which -a MSBuild.exe
