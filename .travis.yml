@@ -57,7 +57,10 @@ jobs:
         - find
         - export MSBuildExtensionsPath='C:\Program Files (x86)\MSBuild'
         - which -a msbuild
-        - msbuild.exe /p:Configuration=Debug . 2>&1
+        - which -a MSBuild.exe
+        - export PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin/amd64/'
+        - which -a MSBuild.exe
+        - MSBuild.exe /p:Configuration=Debug . 2>&1
       after_failure:
         - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
         - echo "# CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
