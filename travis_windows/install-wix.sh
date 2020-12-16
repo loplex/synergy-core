@@ -5,4 +5,4 @@ echo '### installing WiX prerequisite'
 #choco install nuget.commandline
 #nuget install WiX.Toolset
 #choco install wixtoolset
-cinst -y --no-progress wixtoolset
+choco install wixtoolset --version 3.11.1
