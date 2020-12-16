@@ -14,59 +14,80 @@ jobs:
 #      solution:
       env:
         - DOWNLOAD_DIR='C:\downloads'
+        - QT_ONLINE_INSTALLER_URL='https://download.qt.io/archive/online_installers/3.2/qt-unified-windows-x86-3.2.3-online.exe'
         - QT_INSTALL_DIR='C:\Qt'
         - QT_INSTALL_MSVC_SUBDIR='5.9.9\msvc2015_64'
         - QT_INSTALL_MSVC_PACKAGE='qt.qt5.599.win64_msvc2015_64'
         - CMAKE_PREFIX_PATH="${QT_INSTALL_DIR}\\${QT_INSTALL_MSVC_SUBDIR}"
-      install:
-        - |-
-          if ! [[ -d "$CMAKE_PREFIX_PATH" ]]; then
-            export QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\qt-unified-windows-x86-online.exe"
-            if ! [[ -f "$QT_INSTALLER_PATH" ]]; then
-              ./travis_windows/download-qt-installer.sh
-            else
-              echo '### using cached Qt online installer';
-            fi
-
-            ./travis_windows/set-qt-account.sh
-
-            ./travis_windows/install-qt.sh
-
-          else
-            echo '### using cached installed Qt prerequisites'
-          fi
-        - ls -ld "$CMAKE_PREFIX_PATH"
-        - du -h -d 1 "$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH"
-        - ./travis_windows/install-wix.sh
-        - '[[ -d "$CMAKE_PREFIX_PATH" ]]'
       cache:
         directories:
           - "$DOWNLOAD_DIR"
           - "$QT_INSTALL_DIR"
+      install:
+        - function cached() { [[ -e "$1" ]] && echo "### using cached '$1' ${2:+($2)}" ; }
+        - function mkparentdir() { mkdir -p "$(realpath "$(dirname "$1")")" ; }
+        - |-
+          if ! cached "$CMAKE_PREFIX_PATH" 'CMake Qt MSVC prefix path'; then
+            export QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\${QT_ONLINE_INSTALLER_URL##*/}"
+
+            if ! cached "$QT_INSTALLER_PATH" 'Qt online installer'; then
+              echo '### downloading Qt online installer'
+              mkparentdir "$QT_INSTALLER_PATH"
+              wget --progress=dot:giga "$QT_ONLINE_INSTALLER_URL" -O "$QT_INSTALLER_PATH"
+            fi
+
+            echo '### setting Qt account login'
+            qt_account_ini_path="${APPDATA}\\Qt\\qtaccount.ini"
+            mkparentdir "$qt_account_ini_path"
+            printf '%s\n' '[QtAccount]' "email=$QT_ACCOUNT_LOGIN" "jwt=$QT_ACCOUNT_TOKEN" > "$qt_account_ini_path"
+
+            echo '### installing Qt dependencies using Qt online installer'
+            mkparentdir "$QT_INSTALL_DIR"
+            "$(realpath "$QT_INSTALLER_PATH")" -v --script 'travis_windows\install-qt.qs' 2>&1 | grep 'QTCI'
+            [[ -d "$CMAKE_PREFIX_PATH" ]]
+          fi
+
+        - function my_du() { du --max-depth=1 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
+        - function my_diff() { comm --total -3 --output-delimiter=$'\t\t\t\t\t' "$1" "$2" | column -t -s $'\t' ; }
+        - my_du_dirs=("$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH" 'C:\Program Files' 'C:\Program Files (x86)' "$TRAVIS_BUILD_DIR")
+
+        - my_du "${my_du_dirs[@]}" | tee ~/du_1.txt
+
+        - powershell Install-WindowsFeature Net-Framework-Core
+        - my_du "${my_du_dirs[@]}" | tee ~/du_2.txt
+
+        - choco install microsoft-build-tools --version=14.0.25420.1 --side-by-side
+        - my_du "${my_du_dirs[@]}" | tee ~/du_3.txt
+
+        - choco install visualcpp-build-tools --version 14.0.25420.1
+        - my_du "${my_du_dirs[@]}" | tee ~/du_4.txt
+
+        - cinst -y wixtoolset --version 3.11.1
+        - my_du "${my_du_dirs[@]}" | tee ~/du_5.txt
+
+        - my_diff ~/du_1.txt ~/du_2.txt
+        - my_diff ~/du_2.txt ~/du_3.txt
+        - my_diff ~/du_3.txt ~/du_4.txt
+        - my_diff ~/du_4.txt ~/du_5.txt
+
       script:
         - echo '##### script -##### (jobs-include-windows-script) '
         - mkdir 'build' && cd $_
-#        - echo export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:$PATH"
         - >-
-          echo '# cmake generator';
-          cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug ..
+          echo '# CMake generate';
+          cmake -G 'Visual Studio 14 2015 Win64' -A 'x64' -T 'v140,host=x64' -D 'CMAKE_BUILD_TYPE=Debug' '..'
         - >-
-          "/c/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m /verbosity:diag
+          echo '# CMake build';
+          cmake --build '.'
         - >-
-          echo '# cmake build';
-          cmake --build .
-        - >-
-          dotnet build synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m /verbosity:diag
-        - cd installer
-        - pwd
-        - find
-        - MSBuild.exe '/p:Configuration=Debug;Platform=x64'
-        - echo export MSBuildExtensionsPath='C:\Program Files (x86)\MSBuild'
-        - echo which -a msbuild
-        - echo which -a MSBuild.exe
-#        - export PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin/amd64/"
-        - echo which -a MSBuild.exe
-        - echo MSBuild.exe '/p:Configuration=Debug' 2>&1
+          echo '# MSBuild WIX installer';
+          cd installer;
+          msbuild_base_dir='C:\Program Files (x86)\MSBuild';
+          msbuild_140_bin_subdir='14.0\Bin\amd64';
+          msbuild_40_140_vc_cpp_subdir='Microsoft.Cpp\v4.0\V140';
+          msbuild="$(realpath "${msbuild_base_dir}\\${msbuild_bin_subdir}\\MSBuild.exe")";
+          export VCTargetsPath="${msbuild_base_dir}\\${msbuild_40_140_vc_cpp_subdir}";
+          "$msbuild" //verbosity:diag
 
       after_failure:
         - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
@@ -75,6 +96,7 @@ jobs:
           cmake_output_log="${TRAVIS_BUILD_DIR}/build/CMakeFiles/CMakeOutput.log";
           echo "# $cmake_output_log :";
           cat "$cmake_output_log";
+
 
     - name: linux
       os: linux
@@ -89,13 +111,12 @@ jobs:
             - xorg-dev libx11-dev libgl1-mesa-glx libegl1-mesa
             - qtbase5-dev qtdeclarative5-dev libqt5svg5-dev
             - dpkg-dev git-buildpackage fakeroot debhelper
+
       script:
-        - echo '##### script -##### (jobs-include-linux-script) '
-        - >-
-          echo '# create debian/changelog from git history';
+        - echo '##### script -##### (jobs-include-linux-script)'
+        - echo '# create debian/changelog from git history';
           gbp dch --ignore-branch
-        - >-
-          echo '# make linux DEB package';
+        - echo '# make linux DEB package';
           dpkg-buildpackage -us -uc
 
 
