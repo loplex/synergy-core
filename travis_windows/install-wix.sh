@@ -11,5 +11,6 @@ powershell Install-WindowsFeature Net-Framework-Core
 #choco install microsoft-build-tools
 #choco install visualstudio2015buildtools
 choco install microsoft-build-tools --version=14.0.25420.1 --side-by-side
+find 'C:\' -name 'vs_buildtools*.exe' -print0 |xargs -0 ls -ld
 which -a cinst
 cinst -y wixtoolset
