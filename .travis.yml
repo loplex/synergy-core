@@ -48,11 +48,11 @@ jobs:
         - ls -l 'C:\Program Files (x86)\Microsoft Visual Studio 14.0'
         - mkdir 'build' && cd $_
 #        - echo export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:$PATH"
+        - cmd /c '..\travis_windows\build.bat'
+        - ../travis_windows/build.bat
         - >-
           echo '# cmake generator';
           cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug ..
-        - '..\travis_windows\build.bat'
-        - ../travis_windows/build.bat
         - '"/c/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m /verbosity:diag'
         - >-
           echo '# cmake build';
