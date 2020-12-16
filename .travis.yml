@@ -50,21 +50,23 @@ jobs:
         - >-
           echo '# cmake generator';
           echo cmake -A x64 -T host=x64 ..;
-          cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug ..;
+          echo cmake -T 'v140,host=x64' -DCMAKE_BUILD_TYPE=Debug ..;
+          cmake .. -G "Visual Studio 14 2015" -A x64 -T v140,host=x64
           pwd;
-          MSBuild.exe synergy-core.sln
+          echo MSBuild.exe /p:Configuration=Debug /p:Platform=x64 synergy-core.sln
         - >-
           echo '# cmake build';
           cmake --build .
         - cd installer
         - pwd
         - find
-        - export MSBuildExtensionsPath='C:\Program Files (x86)\MSBuild'
-        - which -a msbuild
-        - which -a MSBuild.exe
+        - MSBuild.exe /p:Configuration=Debug /p:Platform=x64
+        - echo export MSBuildExtensionsPath='C:\Program Files (x86)\MSBuild'
+        - echo which -a msbuild
+        - echo which -a MSBuild.exe
 #        - export PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin/amd64/"
-        - which -a MSBuild.exe
-        - MSBuild.exe '/p:Configuration=Debug' 2>&1
+        - echo which -a MSBuild.exe
+        - echo MSBuild.exe '/p:Configuration=Debug' 2>&1
 
       after_failure:
         - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
