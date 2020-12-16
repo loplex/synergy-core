@@ -49,12 +49,14 @@ jobs:
 #        - echo export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:$PATH"
         - >-
           echo '# cmake generator';
-          cmake .. -G 'Visual Studio 14 2015' -A 'x64' -T 'v140,host=x64' -D 'CMAKE_BUILD_TYPE=Debug'
+          cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug ..
         - >-
-          "/c/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" /verbosity:diag  '/p:Configuration=Debug;Platform=x64' synergy-core.sln
+          "/c/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe" synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m /verbosity:diag
         - >-
           echo '# cmake build';
           cmake --build .
+        - >-
+          dotnet build synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m /verbosity:diag
         - cd installer
         - pwd
         - find
