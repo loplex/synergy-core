@@ -46,9 +46,12 @@ jobs:
       script:
         - echo '##### script -##### (jobs-include-windows-script) '
         - mkdir 'build' && cd $_
+        - export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:$PATH"
         - >-
           echo '# cmake generator';
-          cmake -A x64 -T host=x64 ..
+          echo cmake -A x64 -T host=x64 ..;
+          cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug ..;
+          MSBuild.exe synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m
         - >-
           echo '# cmake build';
           cmake --build .
@@ -59,9 +62,9 @@ jobs:
         - which -a msbuild
         - which -a MSBuild.exe
 #        - export PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin/amd64/"
-        - export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:$PATH"
         - which -a MSBuild.exe
         - MSBuild.exe '/p:Configuration=Debug' 2>&1
+
       after_failure:
         - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
         - echo "# CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
