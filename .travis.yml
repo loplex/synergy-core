@@ -52,7 +52,11 @@ jobs:
         - >-
           echo '# cmake build';
           cmake --build .
-        - cd installer && dotnet build /p:Configuration=Debug .
+        - cd installer
+        - pwd
+        - find
+        - export MSBuildExtensionsPath='C:\Program Files (x86)\MSBuild'
+        - msbuild /p:Configuration=Debug .
       after_failure:
         - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
         - echo "# CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
@@ -89,6 +93,7 @@ after_script:
   - du -h -d 3 ~ "$TRAVIS_BUILD_DIR"
   - find ~/* -print0 | xargs -0 ls -ld
   - find 'C:\' -iname 'wix.targets' -print0 | xargs -0 ls -ld
+  - find 'C:\Program Files (x86)' -iname 'wix.targets' -print0 | xargs -0 ls -ld
 
 
 after_failure:
