@@ -59,7 +59,7 @@ jobs:
         - which -a msbuild
         - which -a MSBuild.exe
 #        - export PATH="$PATH:/c/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin/amd64/"
-        - export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe:$PATH"
+        - export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:$PATH"
         - which -a MSBuild.exe
         - MSBuild.exe '/p:Configuration=Debug' 2>&1
       after_failure:
