@@ -51,7 +51,8 @@ jobs:
           echo '# cmake generator';
           echo cmake -A x64 -T host=x64 ..;
           cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug ..;
-          MSBuild.exe synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m
+          pwd;
+          MSBuild.exe synergy-core.sln
         - >-
           echo '# cmake build';
           cmake --build .
