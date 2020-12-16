@@ -56,7 +56,8 @@ jobs:
         - pwd
         - find
         - export MSBuildExtensionsPath='C:\Program Files (x86)\MSBuild'
-        - msbuild /p:Configuration=Debug .
+        - which -a msbuild
+        - msbuild.exe /p:Configuration=Debug . 2>&1
       after_failure:
         - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
         - echo "# CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
@@ -94,6 +95,7 @@ after_script:
   - find ~/* -print0 | xargs -0 ls -ld
   - find 'C:\' -iname 'wix.targets' -print0 | xargs -0 ls -ld
   - find 'C:\Program Files (x86)' -iname 'wix.targets' -print0 | xargs -0 ls -ld
+  - find 'C:\Program Files (x86)' -iname 'msbuild.exe' -print0 | xargs -0 ls -ld
 
 
 after_failure:
