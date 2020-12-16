@@ -51,6 +51,7 @@ jobs:
         - >-
           echo '# cmake build';
           cmake --build .
+        - cd installer && msbuild /p:Configuration=Debug
       after_failure:
         - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
         - echo "# CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
