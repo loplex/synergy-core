@@ -85,7 +85,7 @@ jobs:
 after_script:
   - echo '##### after_script -#####'
   - du -h -d 3 ~ "$TRAVIS_BUILD_DIR"
-  - find ~ -print0 | xargs -0 ls -ld
+  - find ~/* -print0 | xargs -0 ls -ld
 
 
 after_failure:
