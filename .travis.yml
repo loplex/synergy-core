@@ -8,7 +8,7 @@ env:
 before_install:
   - |-
     function travisfold() { echo -en "travis_fold:$1:$2\r" ; }
-    function travisfoldblock() { travisfold start "$1" ; cat ; travisfold end "$2" ; }
+    function travisfoldblock() { travisfold start "$1" ; cat ; travisfold end "$1" ; }
 
 
 jobs:
@@ -71,10 +71,10 @@ jobs:
         - powershell Install-WindowsFeature Net-Framework-Core
 #        - my_du "${my_du_dirs[@]}" | tee ~/du_2.txt
 
-        - cinst install microsoft-build-tools --version=14.0.25420.1 --side-by-side
+        - cinst microsoft-build-tools --version=14.0.25420.1 --side-by-side
 #        - my_du "${my_du_dirs[@]}" | tee ~/du_3.txt
 
-        - cinst install visualcpp-build-tools --version 14.0.25420.1
+        - cinst visualcpp-build-tools --version 14.0.25420.1
 #        - my_du "${my_du_dirs[@]}" | tee ~/du_4.txt
 
         - cinst wixtoolset --version 3.11.1
