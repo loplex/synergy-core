@@ -5,6 +5,11 @@ env:
   global:
     - SYNERGY_ENTERPRISE=ON
 
+before_install:
+  - |-
+    function travisfold() { echo -en "travis_fold:$1:$2\r" ; }
+    function travisfoldblock() { travisfold start "$1" ; cat ; travisfold end "$2" ; }
+
 
 jobs:
   include:
@@ -27,55 +32,62 @@ jobs:
         - |-
           function cached() { [[ -e "$1" ]] && echo "### using cached '$1' ${2:+($2)}" ; }
           function mkparentdir() { mkdir -p "$(realpath "$(dirname "$1")")" ; }
-          function travisfold() { echo -en "travis_fold:$1:$2\r" ; }
-          function travisfoldblock() { travisfold start "$1" ; cat ; travisfold end "$2" ; }
 
         - |-
-          travisfoldblock 'CMake Qt MSVC prefix path' < <(
-            if ! cached "$CMAKE_PREFIX_PATH" 'CMake Qt MSVC prefix path'; then
-              export QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\${QT_ONLINE_INSTALLER_URL##*/}"
+          if ! cached "$CMAKE_PREFIX_PATH" 'CMake Qt MSVC prefix path'; then
+            export QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\${QT_ONLINE_INSTALLER_URL##*/}"
 
-              if ! cached "$QT_INSTALLER_PATH" 'Qt online installer'; then
-                echo '### downloading Qt online installer'
-                mkparentdir "$QT_INSTALLER_PATH"
-                wget --progress=dot:giga "$QT_ONLINE_INSTALLER_URL" -O "$QT_INSTALLER_PATH"
-              fi
-
-              echo '### setting Qt account login'
-              qt_account_ini_path="${APPDATA}\\Qt\\qtaccount.ini"
-              mkparentdir "$qt_account_ini_path"
-              printf '%s\n' '[QtAccount]' "email=$QT_ACCOUNT_LOGIN" "jwt=$QT_ACCOUNT_TOKEN" > "$qt_account_ini_path"
-
-              echo '### installing Qt dependencies using Qt online installer'
-              mkparentdir "$QT_INSTALL_DIR"
-              "$(realpath "$QT_INSTALLER_PATH")" -v --script 'travis_windows\install-qt.qs' 2>&1 | tee ~/'install-qt.out' | awk 'NR<42||/QTCI/'
-
-              [[ -d "$CMAKE_PREFIX_PATH" ]] || { echo '### !!! Error installing Qt' ; echo $_ >&2 ; cat ~/'install-qt.out' ; false ; }
+            if ! cached "$QT_INSTALLER_PATH" 'Qt online installer'; then
+              echo '### downloading Qt online installer'
+              mkparentdir "$QT_INSTALLER_PATH"
+              wget --progress=dot:giga "$QT_ONLINE_INSTALLER_URL" -O "$QT_INSTALLER_PATH"
             fi
-          )
 
-        - function my_du() { du --max-depth=1 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
-        - function my_diff() { comm --total -3 --output-delimiter=$'\t\t\t\t\t' "$1" "$2" | column -t -s $'\t' ; }
+            echo '### setting Qt account login'
+            qt_account_ini_path="${APPDATA}\\Qt\\qtaccount.ini"
+            mkparentdir "$qt_account_ini_path"
+            printf '%s\n' '[QtAccount]' "email=$QT_ACCOUNT_LOGIN" "jwt=$QT_ACCOUNT_TOKEN" > "$qt_account_ini_path"
+
+            echo '### installing Qt dependencies using Qt online installer'
+            mkparentdir "$QT_INSTALL_DIR"
+            "$(realpath "$QT_INSTALLER_PATH")" -v --script 'travis_windows\install-qt.qs' 2>&1 | tee ~/'install-qt.out' | awk 'NR<42||/QTCI/'
+
+            [[ -d "$CMAKE_PREFIX_PATH" ]] || { echo '### !!! Error installing Qt' ; echo $_ >&2 ; cat ~/'install-qt.out' ; false ; }
+          fi
+
+        - |-
+          function my_du() { du --max-depth=1 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
+          function my_diff() { comm --total -3 --output-delimiter=$'\t\t\t\t\t' "$1" "$2" | column -t -s $'\t' ; }
+
         - my_du_dirs=("$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH" 'C:\Program Files' 'C:\Program Files (x86)' "$TRAVIS_BUILD_DIR")
+
+        - my_du "$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH"
+        - my_du 'C:\Program Files'
+        - my_du 'C:\Program Files (x86)'
+        - my_du "$TRAVIS_BUILD_DIR"
 
         - my_du "${my_du_dirs[@]}" | tee ~/du_1.txt
 
         - powershell Install-WindowsFeature Net-Framework-Core
-        - my_du "${my_du_dirs[@]}" | tee ~/du_2.txt
+#        - my_du "${my_du_dirs[@]}" | tee ~/du_2.txt
 
-        - choco install microsoft-build-tools --version=14.0.25420.1 --side-by-side
-        - my_du "${my_du_dirs[@]}" | tee ~/du_3.txt
+        - cinst install microsoft-build-tools --version=14.0.25420.1 --side-by-side
+#        - my_du "${my_du_dirs[@]}" | tee ~/du_3.txt
 
-        - choco install visualcpp-build-tools --version 14.0.25420.1
-        - my_du "${my_du_dirs[@]}" | tee ~/du_4.txt
+        - cinst install visualcpp-build-tools --version 14.0.25420.1
+#        - my_du "${my_du_dirs[@]}" | tee ~/du_4.txt
 
-        - cinst -y wixtoolset --version 3.11.1
+        - cinst wixtoolset --version 3.11.1
         - my_du "${my_du_dirs[@]}" | tee ~/du_5.txt
 
-        - my_diff ~/du_1.txt ~/du_2.txt
-        - my_diff ~/du_2.txt ~/du_3.txt
-        - my_diff ~/du_3.txt ~/du_4.txt
-        - my_diff ~/du_4.txt ~/du_5.txt
+#        - my_diff ~/du_1.txt ~/du_2.txt
+#        - my_diff ~/du_2.txt ~/du_3.txt
+#        - my_diff ~/du_3.txt ~/du_4.txt
+#        - my_diff ~/du_4.txt ~/du_5.txt
+
+        - travisfoldblock 'CMake.Qt.MSVC.prefix.path' < <(
+            my_diff ~/du_4.txt ~/du_5.txt
+          )
 
       script:
         - echo '##### script -##### (jobs-include-windows-script) '
@@ -92,13 +104,12 @@ jobs:
           msbuild_base_dir='C:\Program Files (x86)\MSBuild';
           msbuild_140_bin_subdir='14.0\Bin\amd64';
           msbuild_40_140_vc_cpp_subdir='Microsoft.Cpp\v4.0\V140';
-          msbuild="$(realpath "${msbuild_base_dir}\\${msbuild_bin_subdir}\\MSBuild.exe")";
+          msbuild="$(realpath "${msbuild_base_dir}\\${msbuild_140_bin_subdir}\\MSBuild.exe")";
           export VCTargetsPath="${msbuild_base_dir}\\${msbuild_40_140_vc_cpp_subdir}";
           "$msbuild" //verbosity:diag
 
       after_failure:
         - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
-        - echo "# CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
         - >-
           cmake_output_log="${TRAVIS_BUILD_DIR}/build/CMakeFiles/CMakeOutput.log";
           echo "# $cmake_output_log :";
