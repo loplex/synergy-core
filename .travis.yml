@@ -9,10 +9,13 @@ before_install:
   - |-
     function travisfold() { echo -en "travis_fold:$1:$2\r" ; }
     function travisfoldblock() { travisfold start "$1" ; cat ; travisfold end "$1" ; }
+
     RED="\033[31;1m"; GREEN="\033[32;1m"; RESET="\033[0m"
     function travis_color() { echo -e "${!1}" "${@:2}" ; }
+
     function travisfoldtitled() { { travis_color GREEN "$2" ; cat ; } | travisfoldblock "$1" ; }
     function travisafterfailurediagcmd() { { travis_color RED "${@:2}" ; ${@:2} ; } | travisfoldblock "$1" ; }
+
   - |-
     function my_du() { du --max-depth=1 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
 
@@ -76,58 +79,89 @@ jobs:
         - |-
           function my_diff() { comm --total -3 --output-delimiter=$'\t\t\t\t\t' "$1" "$2" | column -t -s $'\t' ; }
 
-        - my_du_dirs=("$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH" "$TRAVIS_BUILD_DIR")
+        - my_du_dirs_home=("$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH" "$TRAVIS_BUILD_DIR")
+        - my_du_dirs_progfiles=("$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH" "$TRAVIS_BUILD_DIR")
+        - my_du_dirs_user=("${HOMEDRIVE}${HOMEPATH}")
 
 #        - my_du "$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH"
 #        - my_du 'C:\Program Files'
 #        - my_du 'C:\Program Files (x86)'
 #        - my_du "$TRAVIS_BUILD_DIR"
 
-        - my_du "${my_du_dirs[@]}" | tee ~/du_1.txt
+        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_1.txt
+        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_1.txt
+        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_1.txt
 
         - powershell Install-WindowsFeature Net-Framework-Core
-        - my_du "${my_du_dirs[@]}" | tee ~/du_2.txt
+        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_2.txt
+        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_2.txt
+        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_2.txt
 
         - cinst microsoft-build-tools --version "$MSBUILD_TOOLS_VERSION_FULL" --side-by-side
-        - my_du "${my_du_dirs[@]}" | tee ~/du_3.txt
+        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_3.txt
+        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_3.txt
+        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_3.txt
 
         - cinst visualcpp-build-tools --version "$MSBUILD_TOOLS_VERSION_FULL"
-        - my_du "${my_du_dirs[@]}" | tee ~/du_4.txt
+        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_4.txt
+        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_4.txt
+        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_4.txt
 
         - cinst wixtoolset --version "$WIX_TOOLSET_VERSION"
-        - my_du "${my_du_dirs[@]}" | tee ~/du_5.txt
+        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_5.txt
+        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_5.txt
+        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_5.txt
 
-        - my_diff ~/du_1.txt ~/du_2.txt
-        - my_diff ~/du_2.txt ~/du_3.txt
-        - my_diff ~/du_3.txt ~/du_4.txt
-        - my_diff ~/du_4.txt ~/du_5.txt
+        - ls -l ~/du_home_*.txt
+        - md5sum ~/du_home_*.txt
 
-        - travisfoldblock 'CMake.Qt.MSVC.prefix.path' < <(
-            my_diff ~/du_4.txt ~/du_5.txt
+        - travisfoldblock 'du.home.md5.travisfoldblock' < <(
+            ls -l ~/du_home_*.txt;
+            md5sum ~/du_home_*.txt
           )
-        - travisfoldtitled 'CMake.Qt.MSVC.prefix.path' '### CMake Qt MSVC prefix path' < <(
-            my_diff ~/du_4.txt ~/du_5.txt
+
+        - travisfoldtitled 'du.home.md5.travisfoldtitled' '### du _ home _ md5 _ travisfoldtitled' < <(
+            ls -l ~/du_home_*.txt;
+            md5sum ~/du_home_*.txt
           )
+
+        - travisafterfailurediagcmd 'du.home.md5.travisafterfailurediagcmd' ls -l ~/du_home_*.txt
+        - travisafterfailurediagcmd 'du.home.md5.travisafterfailurediagcmd' md5sum ~/du_home_*.txt
+
+        - ls -l ~/du_progfiles_*.txt
+        - md5sum ~/du_progfiles_*.txt
+        - my_diff ~/du_progfiles_1.txt ~/du_progfiles_2.txt
+        - my_diff ~/du_progfiles_2.txt ~/du_progfiles_3.txt
+        - my_diff ~/du_progfiles_3.txt ~/du_progfiles_4.txt
+        - my_diff ~/du_progfiles_4.txt ~/du_progfiles_5.txt
+
+        - ls -l ~/du_user_*.txt
+        - md5sum ~/du_user_*.txt
+        - my_diff ~/du_user_1.txt ~/du_user_2.txt
+        - my_diff ~/du_user_2.txt ~/du_user_3.txt
+        - my_diff ~/du_user_3.txt ~/du_user_4.txt
+        - my_diff ~/du_user_4.txt ~/du_user_5.txt
+
 
       script:
         - echo '##### script -##### (jobs-include-windows-script) '
         - mkdir 'build' && cd $_
 
+        # cmake -G 'Visual Studio 14 2015' -A 'x64' -T 'v140,host=x64' -D 'CMAKE_BUILD_TYPE=Debug' '..'
         - echo '# CMake generate';
           cmake -D 'CMAKE_BUILD_TYPE=Debug' '..'
-
-#        - cmake -G 'Visual Studio 14 2015' -A 'x64' -T 'v140,host=x64' -D 'CMAKE_BUILD_TYPE=Debug' '..'
 
         - echo '# CMake build';
           cmake --build '.'
 
+        # "C:/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe' /p:Configuration=Debug /p:Platform=x64 /verbosity:diag
         - echo '# MSBuild WIX installer';
           cd installer;
           "$(realpath "$msbuild_path")" //p:Configuration=Debug //verbosity:diag
 
-#        - "$(realpath "$msbuild")" //p:Configuration=Debug //p:Platform=x64 //verbosity:diag
 
-        - which -a msbuild
+        - false;
+
 
       after_failure:
         - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
@@ -156,8 +190,9 @@ jobs:
 
       script:
         - echo '##### script -##### (jobs-include-linux-script)'
-        - gbp dch --ignore-branch 2>&1 | travisfoldtitled 'create.debian.changelog.from.git.history' '# create debian/changelog from git history'
-        - dpkg-buildpackage -us -uc 2>&1 | travisfoldtitled 'make.linux.DEB.package' '# make linux DEB package'
+        - travisfoldtitled 'create.debian.changelog.from.git.history' '# create debian/changelog from git history' < <( gbp dch --ignore-branch 2>&1 )
+        - travisfoldtitled 'make.linux.DEB.package' '# make linux DEB package' < <( dpkg-buildpackage -us -uc 2>&1 )
+
 #        - travisfoldtitled 'create.debian.changelog.from.git.history' '# create debian/changelog from git history' < <(
 #            gbp dch --ignore-branch
 #          )
@@ -168,10 +203,16 @@ jobs:
 
 after_script:
   - echo '##### after_script -#####'
+
+  - which -a msbuild
+  - which -a MSBuild.exe
+  - where msbuild
+
   - du -h -d 1 ~ "$TRAVIS_BUILD_DIR"
   - find "$TRAVIS_BUILD_DIR" -print0 | xargs -0 ls -ld
 
-  - find 'C:\' -iname 'msbuild' -print0 | xargs -0 ls -ld
+  - travisafterfailurediagcmd 'find.from.root.one' find / -iname '*msbuild*' -print0 \| xargs -0 ls -ld
+  - travisafterfailurediagcmd 'find.from.root.two' "find / -iname '*msbuild*' -print0 | xargs -0 ls -ld"
 
   - env
 
