@@ -27,28 +27,32 @@ jobs:
         - |-
           function cached() { [[ -e "$1" ]] && echo "### using cached '$1' ${2:+($2)}" ; }
           function mkparentdir() { mkdir -p "$(realpath "$(dirname "$1")")" ; }
+          function travisfold() { echo -en "travis_fold:$1:$2\r" ; }
+          function travisfoldblock() { travisfold start "$1" ; cat ; travisfold end "$2" ; }
 
         - |-
-          if ! cached "$CMAKE_PREFIX_PATH" 'CMake Qt MSVC prefix path'; then
-            export QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\${QT_ONLINE_INSTALLER_URL##*/}"
+          travisfoldblock 'CMake Qt MSVC prefix path' < <(
+            if ! cached "$CMAKE_PREFIX_PATH" 'CMake Qt MSVC prefix path'; then
+              export QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\${QT_ONLINE_INSTALLER_URL##*/}"
 
-            if ! cached "$QT_INSTALLER_PATH" 'Qt online installer'; then
-              echo '### downloading Qt online installer'
-              mkparentdir "$QT_INSTALLER_PATH"
-              wget --progress=dot:giga "$QT_ONLINE_INSTALLER_URL" -O "$QT_INSTALLER_PATH"
+              if ! cached "$QT_INSTALLER_PATH" 'Qt online installer'; then
+                echo '### downloading Qt online installer'
+                mkparentdir "$QT_INSTALLER_PATH"
+                wget --progress=dot:giga "$QT_ONLINE_INSTALLER_URL" -O "$QT_INSTALLER_PATH"
+              fi
+
+              echo '### setting Qt account login'
+              qt_account_ini_path="${APPDATA}\\Qt\\qtaccount.ini"
+              mkparentdir "$qt_account_ini_path"
+              printf '%s\n' '[QtAccount]' "email=$QT_ACCOUNT_LOGIN" "jwt=$QT_ACCOUNT_TOKEN" > "$qt_account_ini_path"
+
+              echo '### installing Qt dependencies using Qt online installer'
+              mkparentdir "$QT_INSTALL_DIR"
+              "$(realpath "$QT_INSTALLER_PATH")" -v --script 'travis_windows\install-qt.qs' 2>&1 | tee ~/'install-qt.out' | awk 'NR<42||/QTCI/'
+
+              [[ -d "$CMAKE_PREFIX_PATH" ]] || { echo '### !!! Error installing Qt' ; echo $_ >&2 ; cat ~/'install-qt.out' ; false ; }
             fi
-
-            echo '### setting Qt account login'
-            qt_account_ini_path="${APPDATA}\\Qt\\qtaccount.ini"
-            mkparentdir "$qt_account_ini_path"
-            printf '%s\n' '[QtAccount]' "email=$QT_ACCOUNT_LOGIN" "jwt=$QT_ACCOUNT_TOKEN" > "$qt_account_ini_path"
-
-            echo '### installing Qt dependencies using Qt online installer'
-            mkparentdir "$QT_INSTALL_DIR"
-            "$(realpath "$QT_INSTALLER_PATH")" -v --script 'travis_windows\install-qt.qs' 2>&1 | tee ~/'install-qt.out' | grep 'QTCI'
-
-            [[ -d "$CMAKE_PREFIX_PATH" ]] || { echo '### !!! Error installing Qt' ; echo $_ >&2 ; cat ~/'install-qt.out' ; false ; }
-          fi
+          )
 
         - function my_du() { du --max-depth=1 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
         - function my_diff() { comm --total -3 --output-delimiter=$'\t\t\t\t\t' "$1" "$2" | column -t -s $'\t' ; }
@@ -78,7 +82,7 @@ jobs:
         - mkdir 'build' && cd $_
         - >-
           echo '# CMake generate';
-          cmake -G 'Visual Studio 14 2015 Win64' -A 'x64' -T 'v140,host=x64' -D 'CMAKE_BUILD_TYPE=Debug' '..'
+          cmake -G 'Visual Studio 14 2015' -A 'x64' -T 'v140,host=x64' -D 'CMAKE_BUILD_TYPE=Debug' '..'
         - >-
           echo '# CMake build';
           cmake --build '.'
