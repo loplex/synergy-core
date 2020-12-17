@@ -92,14 +92,14 @@ jobs:
       script:
         - echo '##### script -##### (jobs-include-windows-script) '
         - mkdir 'build' && cd $_
-        - >-
-          echo '# CMake generate';
+
+        - echo '# CMake generate';
           cmake -G 'Visual Studio 14 2015' -A 'x64' -T 'v140,host=x64' -D 'CMAKE_BUILD_TYPE=Debug' '..'
-        - >-
-          echo '# CMake build';
+
+        - echo '# CMake build';
           cmake --build '.'
-        - >-
-          echo '# MSBuild WIX installer';
+
+        - echo '# MSBuild WIX installer';
           cd installer;
           msbuild_base_dir='C:\Program Files (x86)\MSBuild';
           msbuild_140_bin_subdir='14.0\Bin\amd64';
@@ -110,8 +110,7 @@ jobs:
 
       after_failure:
         - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
-        - >-
-          cmake_output_log="${TRAVIS_BUILD_DIR}/build/CMakeFiles/CMakeOutput.log";
+        - cmake_output_log="${TRAVIS_BUILD_DIR}/build/CMakeFiles/CMakeOutput.log";
           echo "# $cmake_output_log :";
           cat "$cmake_output_log";
 
@@ -132,10 +131,14 @@ jobs:
 
       script:
         - echo '##### script -##### (jobs-include-linux-script)'
-        - echo '# create debian/changelog from git history';
-          gbp dch --ignore-branch
-        - echo '# make linux DEB package';
-          dpkg-buildpackage -us -uc
+        - travisfoldblock 'create.debian.changelog.from.git.history' < <(
+            echo '# create debian/changelog from git history';
+            gbp dch --ignore-branch
+          )
+        - travisfoldblock 'make.linux.DEB.package' < <(
+            echo '# make linux DEB package';
+            dpkg-buildpackage -us -uc
+          )
 
 
 after_script:
@@ -151,5 +154,3 @@ after_script:
 after_failure:
   - echo '##### after_failure -#####'
   - echo "# PWD=$PWD"
-  - echo "# TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR"
-  - mount
