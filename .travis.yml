@@ -19,8 +19,8 @@ before_install:
     function travisfoldtitled() { { travis_color GREEN "$2" ; cat ; } 2>&1 | travisfoldblock "$1" ; }
 
     function traviscolordiagcmd() { { travis_color "$1" "${@:3}" ; ${@:3} ; } 2>&1 | travisfoldblock "$2" ; }
-    function travislogdiagcmd() { traviscolordiagcmd GREEEN "$@" ; }
-    function traviserrdiagcmd()  { traviscolordiagcmd RED "$@" ; }
+    function travislogdiagcmd() { traviscolordiagcmd GREEEN $@ ; }
+    function traviserrdiagcmd()  { traviscolordiagcmd RED $@ ; }
 
   # various util function
   - |-
@@ -102,7 +102,7 @@ jobs:
           function my_diff() { comm --total -3 --output-delimiter=$'\t\t\t\t\t' "$1" "$2" | column -t -s $'\t' ; }
 
         - my_du_dirs_home=("$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH" "$TRAVIS_BUILD_DIR")
-        - my_du_dirs_progfiles=("$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH" "$TRAVIS_BUILD_DIR")
+        - my_du_dirs_progfiles=('C:\Program Files' 'C:\Program Files (x86)')
         - my_du_dirs_user=("${HOMEDRIVE}${HOMEPATH}")
 
 #        - my_du "$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH"
@@ -233,11 +233,13 @@ jobs:
 after_script:
   - echo '##### after_script -#####'
 
-  - which -a msbuild
-  - which -a MSBuild.exe
-  - where msbuild
-  - where.exe msbuild
-  - /c/Windows/System32/where.exe msbuild
+  - |-
+    which -a msbuild
+    which -a MSBuild.exe
+    where msbuild
+    where.exe msbuild
+    /c/Windows/System32/where.exe msbuild
+    cmd /C 'where msbuild'
 
   - du -h -d 1 ~ "$TRAVIS_BUILD_DIR"
   - find "$TRAVIS_BUILD_DIR" -print0 | xargs -0 ls -ld
