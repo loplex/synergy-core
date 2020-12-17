@@ -211,10 +211,9 @@ jobs:
 
       script:
         - echo '##### script -##### (jobs-include-linux-script)'
-        - |-
-          travisfoldtitled 'create.debian.changelog.from.git.history' '# create debian/changelog from git history' < <(
+        - travisfoldtitled 'create.debian.changelog.from.git.history' '# create debian/changelog from git history' < <(
             gbp dch --ignore-branch
-          )
+          );
           travisfoldtitled 'make.linux.DEB.package' '# make linux DEB package' < <(
             dpkg-buildpackage -us -uc
           )
@@ -233,6 +232,8 @@ after_script:
   - which -a msbuild
   - which -a MSBuild.exe
   - where msbuild
+  - where.exe msbuild
+  - /c/Windows/System32/where.exe msbuild
 
   - du -h -d 1 ~ "$TRAVIS_BUILD_DIR"
   - find "$TRAVIS_BUILD_DIR" -print0 | xargs -0 ls -ld
