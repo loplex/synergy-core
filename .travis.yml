@@ -12,7 +12,7 @@ before_install:
     RED="\033[31;1m"; GREEN="\033[32;1m"; RESET="\033[0m"
     function travis_color() { echo -e "${!1}" "${@:2}" ; }
     function travisfoldtitled() { travisfoldblock "$1" < <( travis_color GREEN "$2" ) ; }
-    function travisafterfailurediagcmd() { travisfoldblock "$1" < <( travis_color RED "$2" ; ${@:3} ) ; }
+    function travisafterfailurediagcmd() { travisfoldblock "$1" < <( travis_color RED "${@:2}" ; ${@:2} ) ; }
   - |-
     function my_du() { du --max-depth=1 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
 
@@ -78,29 +78,29 @@ jobs:
 
         - my_du_dirs=("$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH" "$TRAVIS_BUILD_DIR")
 
-        - my_du "$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH"
-        - my_du 'C:\Program Files'
-        - my_du 'C:\Program Files (x86)'
-        - my_du "$TRAVIS_BUILD_DIR"
+#        - my_du "$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH"
+#        - my_du 'C:\Program Files'
+#        - my_du 'C:\Program Files (x86)'
+#        - my_du "$TRAVIS_BUILD_DIR"
 
         - my_du "${my_du_dirs[@]}" | tee ~/du_1.txt
 
         - powershell Install-WindowsFeature Net-Framework-Core
-#        - my_du "${my_du_dirs[@]}" | tee ~/du_2.txt
+        - my_du "${my_du_dirs[@]}" | tee ~/du_2.txt
 
         - cinst microsoft-build-tools --version "$MSBUILD_TOOLS_VERSION_FULL" --side-by-side
-#        - my_du "${my_du_dirs[@]}" | tee ~/du_3.txt
+        - my_du "${my_du_dirs[@]}" | tee ~/du_3.txt
 
         - cinst visualcpp-build-tools --version "$MSBUILD_TOOLS_VERSION_FULL"
-#        - my_du "${my_du_dirs[@]}" | tee ~/du_4.txt
+        - my_du "${my_du_dirs[@]}" | tee ~/du_4.txt
 
         - cinst wixtoolset --version "$WIX_TOOLSET_VERSION"
         - my_du "${my_du_dirs[@]}" | tee ~/du_5.txt
 
-#        - my_diff ~/du_1.txt ~/du_2.txt
-#        - my_diff ~/du_2.txt ~/du_3.txt
-#        - my_diff ~/du_3.txt ~/du_4.txt
-#        - my_diff ~/du_4.txt ~/du_5.txt
+        - my_diff ~/du_1.txt ~/du_2.txt
+        - my_diff ~/du_2.txt ~/du_3.txt
+        - my_diff ~/du_3.txt ~/du_4.txt
+        - my_diff ~/du_4.txt ~/du_5.txt
 
         - travisfoldblock 'CMake.Qt.MSVC.prefix.path' < <(
             my_diff ~/du_4.txt ~/du_5.txt
@@ -136,12 +136,8 @@ jobs:
           echo "# $cmake_output_log :";
           cat "$cmake_output_log";
 
-        - travisfoldtitled 'du.program.files.dirs' 'C:\Program Files (x86)'' '### CMake Qt MSVC prefix path' < <(
-          my_diff ~/du_4.txt ~/du_5.txt
-          )
-
-        -
-
+        - travisafterfailurediagcmd 'du.program.files.dirs' my_du 'C:\Program Files' 'C:\Program Files (x86)'
+        - travisafterfailurediagcmd 'du.program.files.dirs' "my_du 'C:\Program Files' 'C:\Program Files (x86)'"
 
 
     - name: linux
