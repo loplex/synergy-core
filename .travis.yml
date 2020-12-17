@@ -17,7 +17,7 @@ jobs:
         - QT_ONLINE_INSTALLER_URL='https://download.qt.io/archive/online_installers/3.2/qt-unified-windows-x86-3.2.3-online.exe'
         - QT_INSTALL_DIR='C:\Qt'
         - QT_INSTALL_MSVC_SUBDIR='5.9.9\msvc2015_64'
-        - QT_INSTALL_MSVC_PACKAGE='qt.qt5.599.win64_msvc2015_64'
+        - QT_INSTALL_PACKAGES='qt.qt5.599.win64_msvc2015_64'
         - CMAKE_PREFIX_PATH="${QT_INSTALL_DIR}\\${QT_INSTALL_MSVC_SUBDIR}"
       cache:
         directories:
@@ -27,6 +27,7 @@ jobs:
         - |-
           function cached() { [[ -e "$1" ]] && echo "### using cached '$1' ${2:+($2)}" ; }
           function mkparentdir() { mkdir -p "$(realpath "$(dirname "$1")")" ; }
+
         - |-
           if ! cached "$CMAKE_PREFIX_PATH" 'CMake Qt MSVC prefix path'; then
             export QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\${QT_ONLINE_INSTALLER_URL##*/}"
@@ -44,9 +45,9 @@ jobs:
 
             echo '### installing Qt dependencies using Qt online installer'
             mkparentdir "$QT_INSTALL_DIR"
-            QT_INSTALL_PACKAGES="$QT_INSTALL_MSVC_PACKAGE" "$(realpath "$QT_INSTALLER_PATH")" -v --script 'travis_windows\install-qt.qs' 2>&1 | grep 'QTCI'
+            "$(realpath "$QT_INSTALLER_PATH")" -v --script 'travis_windows\install-qt.qs' 2>&1 | tee ~/'install-qt.out' | grep 'QTCI'
 
-            [[ -d "$CMAKE_PREFIX_PATH" ]] || { echo '### !!! Error installing Qt' >&2 ; return 1 ; }
+            [[ -d "$CMAKE_PREFIX_PATH" ]] || { echo '### !!! Error installing Qt' ; echo $_ >&2 ; cat ~/'install-qt.out' ; false ; }
           fi
 
         - function my_du() { du --max-depth=1 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
