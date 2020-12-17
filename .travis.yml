@@ -11,8 +11,8 @@ before_install:
     function travisfoldblock() { travisfold start "$1" ; cat ; travisfold end "$1" ; }
     RED="\033[31;1m"; GREEN="\033[32;1m"; RESET="\033[0m"
     function travis_color() { echo -e "${!1}" "${@:2}" ; }
-    function travisfoldtitled() { travisfoldblock "$1" < <( travis_color GREEN "$2" ) ; }
-    function travisafterfailurediagcmd() { travisfoldblock "$1" < <( travis_color RED "${@:2}" ; ${@:2} ) ; }
+    function travisfoldtitled() { { travis_color GREEN "$2" ; cat ; } | travisfoldblock "$1" ; }
+    function travisafterfailurediagcmd() { { travis_color RED "${@:2}" ; ${@:2} ; } | travisfoldblock "$1" ; }
   - |-
     function my_du() { du --max-depth=1 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
 
@@ -156,12 +156,14 @@ jobs:
 
       script:
         - echo '##### script -##### (jobs-include-linux-script)'
-        - travisfoldtitled 'create.debian.changelog.from.git.history' '# create debian/changelog from git history' < <(
-            gbp dch --ignore-branch
-          )
-        - travisfoldtitled 'make.linux.DEB.package' '# make linux DEB package' < <(
-            dpkg-buildpackage -us -uc
-          )
+        - gbp dch --ignore-branch 2>&1 | travisfoldtitled 'create.debian.changelog.from.git.history' '# create debian/changelog from git history'
+        - dpkg-buildpackage -us -uc 2>&1 | travisfoldtitled 'make.linux.DEB.package' '# make linux DEB package'
+#        - travisfoldtitled 'create.debian.changelog.from.git.history' '# create debian/changelog from git history' < <(
+#            gbp dch --ignore-branch
+#          )
+#        - travisfoldtitled 'make.linux.DEB.package' '# make linux DEB package' < <(
+#            dpkg-buildpackage -us -uc
+#          )
 
 
 after_script:
