@@ -91,8 +91,11 @@ jobs:
             travisfoldtitled 'install.Qt' '### installing Qt dependencies using Qt online installer' < <(
               mkparentdir "$QT_INSTALL_DIR"
               "$(realpath "$QT_INSTALLER_PATH")" -v --script 'travis_windows\install-qt.qs' 2>&1 | tee ~/'install-qt.out' | awk 'NR<42||/QTCI/'
+            )
 
-            [[ -d "$CMAKE_PREFIX_PATH" ]] || { echo '### !!! Error installing Qt' ; echo $_ >&2 ; cat ~/'install-qt.out' ; false ; }
+            travisfoldtitled 'install.Qt.ensure.was.success' '### ensuring that Qt installation was sucessful' < <(
+              [[ -d "$CMAKE_PREFIX_PATH" ]] || { echo '### !!! Error installing Qt' ; echo $_ >&2 ; cat ~/'install-qt.out' ; false ; }
+            )
           fi
 
         - |-
@@ -211,6 +214,7 @@ jobs:
 
       script:
         - echo '##### script -##### (jobs-include-linux-script)'
+
         - travisfoldtitled 'create.debian.changelog.from.git.history' '# create debian/changelog from git history' < <(
             gbp dch --ignore-branch
           );
