@@ -24,8 +24,9 @@ jobs:
           - "$DOWNLOAD_DIR"
           - "$QT_INSTALL_DIR"
       install:
-        - function cached() { [[ -e "$1" ]] && echo "### using cached '$1' ${2:+($2)}" ; }
-        - function mkparentdir() { mkdir -p "$(realpath "$(dirname "$1")")" ; }
+        - |-
+          function cached() { [[ -e "$1" ]] && echo "### using cached '$1' ${2:+($2)}" ; }
+          function mkparentdir() { mkdir -p "$(realpath "$(dirname "$1")")" ; }
         - |-
           if ! cached "$CMAKE_PREFIX_PATH" 'CMake Qt MSVC prefix path'; then
             export QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\${QT_ONLINE_INSTALLER_URL##*/}"
@@ -43,7 +44,7 @@ jobs:
 
             echo '### installing Qt dependencies using Qt online installer'
             mkparentdir "$QT_INSTALL_DIR"
-            "$(realpath "$QT_INSTALLER_PATH")" -v --script 'travis_windows\install-qt.qs' 2>&1 | grep 'QTCI'
+            QT_INSTALL_PACKAGES="$QT_INSTALL_MSVC_PACKAGE" "$(realpath "$QT_INSTALLER_PATH")" -v --script 'travis_windows\install-qt.qs' 2>&1 | grep 'QTCI'
 
             [[ -d "$CMAKE_PREFIX_PATH" ]] || { echo '### !!! Error installing Qt' >&2 ; return 1 ; }
           fi
