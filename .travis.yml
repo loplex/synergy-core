@@ -145,19 +145,6 @@ jobs:
           winexec "$msbuild_path" //p:Configuration=Debug //verbosity:diag
 
 
-
-      after_script:
-        - "tr_blue_title '##### after_script ###### (jobs-include-windows-after_script)'"
-
-        - |
-          which -a msbuild
-          which -a MSBuild.exe
-          where msbuild
-          where.exe msbuild
-          /c/Windows/System32/where.exe msbuild
-          cmd /C 'where msbuild'
-          true
-
       after_failure:
         - "tr_blue_title '##### after_failure ###### (jobs-include-windows-after_failure)'"
 
@@ -204,12 +191,20 @@ after_script:
   - find "$TRAVIS_BUILD_DIR" -print0 | xargs -0 ls -ld
 
   - traviserrdiagcmd 'find.from.root.one' find / -iname '*msbuild*' -print0 \| xargs -0 ls -ld
-  - traviserrdiagcmd 'find.from.root.two' "find / -iname '*msbuild*' -print0 | xargs -0 ls -ld"
+  - traviserrdiagcmd 'find.from.root.two' sh -c "find / -iname '*msbuild*' -print0 | xargs -0 ls -ld"
 
-  - env
+  - |
+    which -a msbuild
+    which -a MSBuild.exe
+    where msbuild
+    where.exe msbuild
+    /c/Windows/System32/where.exe msbuild
+    cmd /C 'where msbuild'
+    true
 
+  - jobs
 
-after_failure:
-  - "tr_blue_title '##### after_failure ######'"
+  - ps axuf
 
-  - echo "# PWD=$PWD"
+  - |
+    env
