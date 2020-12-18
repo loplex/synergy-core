@@ -7,35 +7,40 @@ env:
 
 
 before_install:
+  - "tr_blue_title '##### before_install ######'"
 
-  # util function for customizing travis build output log
-  - |-
+  - |
+    # util function for customizing travis build output log
     function travisfold() { echo -en "travis_fold:$1:$2\r" ; }
     function travisfoldblock() { travisfold start "$1" ; cat ; travisfold end "$1" ; }
 
-    RED="\033[31;1m"; GREEN="\033[32;1m"; YELLOW="\033[33;1m"; RESET="\033[0m"
+    RED="\033[31;1m"; GREEN="\033[32;1m"; YELLOW="\033[33;1m"; BLUE="\033[34;1m"; RESET="\033[0m"
     function travis_color() { echo -e "${!1}" "${@:2}" ; }
 
     function travisfoldtitled() { { travis_color GREEN "$2" ; cat ; } 2>&1 | travisfoldblock "$1" ; }
 
-    function traviscolordiagcmd() { { travis_color "$1" "${@:3}" ; ${@:3} ; } 2>&1 | travisfoldblock "$2" ; }
+    function traviscolordiagcmd() { { travis_color "$1" "${@:3}" ; "${@:3}" ; } 2>&1 | travisfoldblock "$2" ; }
     function travislogdiagcmd() { traviscolordiagcmd GREEEN "$@" ; }
     function traviserrdiagcmd()  { traviscolordiagcmd RED "$@" ; }
 
-  # various util function
-  - |-
+  - |
+    # various util function
     function mkparentdir() { mkdir -p "$(realpath "$(dirname "$1")")" ; }
 
     function my_du() { du --max-depth=3 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
 
     function winexec { "$(realpath "$1")" "${@:2}" ; }
 
-    function tr_title { echo -e "$YELLOW" "$@" ; }
+    function tr_yellow_title { echo -e "$YELLOW" "$@" ; }
+    function tr_blue_title { echo -e "$YELLOW" "$@" ; }
 
 
 before_script:
-  # unset sensitive information from variables to prevent printing them to output log
-  - unset QT_ACCOUNT_TOKEN
+  - "tr_blue_title '##### before_script ######'"
+
+  - |
+    # unset sensitive information from variables to prevent printing them to output log
+    unset QT_ACCOUNT_TOKEN
 
 
 jobs:
@@ -70,10 +75,14 @@ jobs:
           - "$QT_INSTALL_DIR"
 
       install:
+        - "tr_blue_title '##### install ###### (jobs-include-install)'"
+
         - |
+          # functions for install
           function cached() { [[ -e "$1" ]] && echo "### using cached '$1' ${2:+($2)}" ; }
 
         - |
+          # install Qt (CMAKE_PREFIX_PATH)
           if ! cached "$CMAKE_PREFIX_PATH" 'CMake Qt MSVC prefix path'; then
             export QT_INSTALLER_PATH="${DOWNLOAD_DIR}\\${QT_ONLINE_INSTALLER_URL##*/}"
 
@@ -117,25 +126,31 @@ jobs:
           )
 
       script:
-        - echo '##### script -##### (jobs-include-windows-script) '
+        - "tr_blue_title '##### script ###### (jobs-include-windows-script)'"
+
         - mkdir 'build' && cd $_
 
         # cmake -G 'Visual Studio 14 2015' -A 'x64' -T 'v140,host=x64' -D 'CMAKE_BUILD_TYPE=Debug' '..'
-        - echo '# CMake generate';
+        - |
+          tr_yellow_title '### CMake generate'
           cmake -D 'CMAKE_BUILD_TYPE=Debug' '..'
 
-        - echo '# CMake build';
+        - |
+          tr_yellow_title '### CMake build'
           cmake --build '.'
 
         # "C:/Program Files (x86)/MSBuild/14.0/Bin/amd64/MSBuild.exe' /p:Configuration=Debug /p:Platform=x64 /verbosity:diag
-        - echo '# MSBuild WIX installer';
-          cd installer;
+        - |
+          tr_yellow_title '### MSBuild WIX installer'
+          cd installer
           "$(realpath "$msbuild_path")" //p:Configuration=Debug //verbosity:diag
 
 
 
       after_script:
-        - |-
+        - "tr_blue_title '##### after_script ###### (jobs-include-windows-after_script)'"
+
+        - |
           which -a msbuild
           which -a MSBuild.exe
           where msbuild
@@ -145,11 +160,12 @@ jobs:
           true
 
       after_failure:
-        - echo '##### after_failure -##### (jobs-include-windows-after_failure)'
+        - "tr_blue_title '##### after_failure ###### (jobs-include-windows-after_failure)'"
 
-        - cmake_output_log="${TRAVIS_BUILD_DIR}/build/CMakeFiles/CMakeOutput.log";
-          echo "# $cmake_output_log :";
-          cat "$cmake_output_log";
+        - |
+          cmake_output_log="${TRAVIS_BUILD_DIR}/build/CMakeFiles/CMakeOutput.log"
+          echo "# $cmake_output_log :"
+          cat "$cmake_output_log"
 
         - traviserrdiagcmd 'du.program.files.dirs.one' my_du 'C:\Program Files' 'C:\Program Files (x86)'
         - traviserrdiagcmd 'du.program.files.dirs.two' "my_du 'C:\Program Files' 'C:\Program Files (x86)'"
@@ -170,20 +186,20 @@ jobs:
             - dpkg-dev git-buildpackage fakeroot debhelper
 
       script:
-        - tr_title '##### script ##### (jobs-include-linux-script)'
+        - "tr_blue_title '##### script ##### (jobs-include-linux-script)'"
 
         - |
-          tr_title '# create debian/changelog from git history'
+          tr_yellow_title '### create debian/changelog from git history'
           gbp dch --ignore-branch
 
         - |
-          tr_title '# make linux DEB package'
+          tr_yellow_title '### make linux DEB package'
           dpkg-buildpackage -us -uc
 
 
 
 after_script:
-  - echo '##### after_script -#####'
+  - "tr_blue_title '##### after_script ######'"
 
   - du -h -d 1 ~ "$TRAVIS_BUILD_DIR"
   - find "$TRAVIS_BUILD_DIR" -print0 | xargs -0 ls -ld
@@ -195,5 +211,6 @@ after_script:
 
 
 after_failure:
-  - echo '##### after_failure -#####'
+  - "tr_blue_title '##### after_failure ######'"
+
   - echo "# PWD=$PWD"
