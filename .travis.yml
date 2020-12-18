@@ -26,7 +26,7 @@ before_install:
   - |-
     function mkparentdir() { mkdir -p "$(realpath "$(dirname "$1")")" ; }
 
-    function my_du() { du --max-depth=1 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
+    function my_du() { du --max-depth=3 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
 
     function winexec { "$(realpath "$1")" "${@:2}" ; }
 
@@ -98,73 +98,77 @@ jobs:
             )
           fi
 
-        - |-
-          function my_diff() { comm --total -3 --output-delimiter=$'\t\t\t\t\t' "$1" "$2" | column -t -s $'\t' ; }
-
-        - my_du_dirs_home=("$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH" "$TRAVIS_BUILD_DIR")
-        - my_du_dirs_progfiles=('C:\Program Files' 'C:\Program Files (x86)')
-        - my_du_dirs_user=("${HOMEDRIVE}${HOMEPATH}")
-
-#        - my_du "$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH"
-#        - my_du 'C:\Program Files'
-#        - my_du 'C:\Program Files (x86)'
-#        - my_du "$TRAVIS_BUILD_DIR"
-
-        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_1.txt
-        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_1.txt
-        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_1.txt
-
-        - powershell Install-WindowsFeature Net-Framework-Core
-        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_2.txt
-        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_2.txt
-        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_2.txt
-
-        - cinst microsoft-build-tools --version "$MSBUILD_TOOLS_VERSION_FULL" --side-by-side
-        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_3.txt
-        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_3.txt
-        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_3.txt
-
-        - cinst visualcpp-build-tools --version "$MSBUILD_TOOLS_VERSION_FULL"
-        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_4.txt
-        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_4.txt
-        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_4.txt
-
+        - choco install microsoft-visual-cpp-build-tools
+        - which -a msbuild || true
         - cinst wixtoolset --version "$WIX_TOOLSET_VERSION"
-        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_5.txt
-        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_5.txt
-        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_5.txt
 
-        - ls -l ~/du_home_*.txt
-        - md5sum ~/du_home_*.txt
+#        - |-
+#          function my_diff() { comm --total -3 --output-delimiter=$'\t\t\t\t\t' "$1" "$2" | column -t -s $'\t' ; }
 
-        - travisfoldblock 'du.home.md5.travisfoldblock' < <(
-            ls -l ~/du_home_*.txt;
-            md5sum ~/du_home_*.txt
-          )
-
-        - travisfoldtitled 'du.home.md5.travisfoldtitled' '### du _ home _ md5 _ travisfoldtitled' < <(
-            ls -l ~/du_home_*.txt;
-            md5sum ~/du_home_*.txt
-          )
-
-        - traviserrdiagcmd 'du.home.md5.traviserrdiagcmd.one' ls -l ~/du_home_*.txt
-        - traviserrdiagcmd 'du.home.md5.traviserrdiagcmd.two' md5sum ~/du_home_*.txt
-        - travislogdiagcmd 'du.home.md5.travislogdiagcmd.one' ls -l ~/du_home_*.txt
-        - travislogdiagcmd 'du.home.md5.travislogdiagcmd.two' md5sum ~/du_home_*.txt
-
-        - ls -l ~/du_progfiles_*.txt
-        - md5sum ~/du_progfiles_*.txt
-        - my_diff ~/du_progfiles_1.txt ~/du_progfiles_2.txt
-        - my_diff ~/du_progfiles_2.txt ~/du_progfiles_3.txt
-        - my_diff ~/du_progfiles_3.txt ~/du_progfiles_4.txt
-        - my_diff ~/du_progfiles_4.txt ~/du_progfiles_5.txt
-
-        - ls -l ~/du_user_*.txt
-        - md5sum ~/du_user_*.txt
-        - my_diff ~/du_user_1.txt ~/du_user_2.txt
-        - my_diff ~/du_user_2.txt ~/du_user_3.txt
-        - my_diff ~/du_user_3.txt ~/du_user_4.txt
-        - my_diff ~/du_user_4.txt ~/du_user_5.txt
+#        - my_du_dirs_home=("$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH" "$TRAVIS_BUILD_DIR")
+#        - my_du_dirs_progfiles=('C:\Program Files' 'C:\Program Files (x86)')
+#        - my_du_dirs_user=("${HOMEDRIVE}${HOMEPATH}")
+#
+##        - my_du "$DOWNLOAD_DIR" "$QT_INSTALL_DIR" "$CMAKE_PREFIX_PATH"
+##        - my_du 'C:\Program Files'
+##        - my_du 'C:\Program Files (x86)'
+##        - my_du "$TRAVIS_BUILD_DIR"
+#
+#        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_1.txt
+#        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_1.txt
+#        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_1.txt
+#
+#        - powershell Install-WindowsFeature Net-Framework-Core
+#        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_2.txt
+#        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_2.txt
+#        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_2.txt
+#
+#        - cinst microsoft-build-tools --version "$MSBUILD_TOOLS_VERSION_FULL" --side-by-side
+#        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_3.txt
+#        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_3.txt
+#        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_3.txt
+#
+#        - cinst visualcpp-build-tools --version "$MSBUILD_TOOLS_VERSION_FULL"
+#        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_4.txt
+#        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_4.txt
+#        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_4.txt
+#
+#        - cinst wixtoolset --version "$WIX_TOOLSET_VERSION"
+#        - my_du "${my_du_dirs_home[@]}" | tee ~/du_home_5.txt
+#        - my_du "${my_du_dirs_progfiles[@]}" | tee ~/du_progfiles_5.txt
+#        - my_du "${my_du_dirs_user[@]}" | tee ~/du_user_5.txt
+#
+#        - ls -l ~/du_home_*.txt
+#        - md5sum ~/du_home_*.txt
+#
+#        - travisfoldblock 'du.home.md5.travisfoldblock' < <(
+#            ls -l ~/du_home_*.txt;
+#            md5sum ~/du_home_*.txt
+#          )
+#
+#        - travisfoldtitled 'du.home.md5.travisfoldtitled' '### du _ home _ md5 _ travisfoldtitled' < <(
+#            ls -l ~/du_home_*.txt;
+#            md5sum ~/du_home_*.txt
+#          )
+#
+#        - traviserrdiagcmd 'du.home.md5.traviserrdiagcmd.one' ls -l ~/du_home_*.txt
+#        - traviserrdiagcmd 'du.home.md5.traviserrdiagcmd.two' md5sum ~/du_home_*.txt
+#        - travislogdiagcmd 'du.home.md5.travislogdiagcmd.one' ls -l ~/du_home_*.txt
+#        - travislogdiagcmd 'du.home.md5.travislogdiagcmd.two' md5sum ~/du_home_*.txt
+#
+#        - ls -l ~/du_progfiles_*.txt
+#        - md5sum ~/du_progfiles_*.txt
+#        - my_diff ~/du_progfiles_1.txt ~/du_progfiles_2.txt
+#        - my_diff ~/du_progfiles_2.txt ~/du_progfiles_3.txt
+#        - my_diff ~/du_progfiles_3.txt ~/du_progfiles_4.txt
+#        - my_diff ~/du_progfiles_4.txt ~/du_progfiles_5.txt
+#
+#        - ls -l ~/du_user_*.txt
+#        - md5sum ~/du_user_*.txt
+#        - my_diff ~/du_user_1.txt ~/du_user_2.txt
+#        - my_diff ~/du_user_2.txt ~/du_user_3.txt
+#        - my_diff ~/du_user_3.txt ~/du_user_4.txt
+#        - my_diff ~/du_user_4.txt ~/du_user_5.txt
 
 
       script:
@@ -213,21 +217,14 @@ jobs:
             - dpkg-dev git-buildpackage fakeroot debhelper
 
       script:
-        - echo '##### script -##### (jobs-include-linux-script)'
+        - | # ##### script -##### (jobs-include-linux-script)
 
-        - travisfoldtitled 'create.debian.changelog.from.git.history' '# create debian/changelog from git history' < <(
+        - | # create debian/changelog from git history
             gbp dch --ignore-branch
-          );
-          travisfoldtitled 'make.linux.DEB.package' '# make linux DEB package' < <(
-            dpkg-buildpackage -us -uc
-          )
 
-#        - travisfoldtitled 'create.debian.changelog.from.git.history' '# create debian/changelog from git history' < <(
-#            gbp dch --ignore-branch
-#          )
-#        - travisfoldtitled 'make.linux.DEB.package' '# make linux DEB package' < <(
-#            dpkg-buildpackage -us -uc
-#          )
+        - | # make linux DEB package
+            dpkg-buildpackage -us -uc
+
 
 
 after_script:
