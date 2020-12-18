@@ -7,7 +7,7 @@ env:
 
 
 before_install:
-  - "tr_blue_title '##### before_install ######'"
+  - "echo '##### before_install ######'"
 
   - |
     # util function for customizing travis build output log
@@ -111,16 +111,19 @@ jobs:
           fi
 
         - |
+          # Install-WindowsFeature Net-Framework-Core
           travisfoldtitled 'Install.WindowsFeature.Net.Framework.Core' '### Install-WindowsFeature Net-Framework-Core' < <(
             powershell Install-WindowsFeature Net-Framework-Core
           )
 
         - | # Microsoft Visual C++ Build Tools 2015 14.0.25420.1  # https://chocolatey.org/packages/microsoft-visual-cpp-build-tools/14.0.25420.1
+          # Microsoft Visual C++ Build Tools 2015 14.0.25420.1  # https://chocolatey.org/packages/microsoft-visual-cpp-build-tools/14.0.25420.1
           travisfoldtitled 'Install.Microsoft.Visual.CPP.Build.Tools.2015' '### installing Microsoft Visual C++ Build Tools 2015 14.0.25420.1' < <(
             cinst microsoft-visual-cpp-build-tools --version "$MS_VS_CPP_BUILD_TOOLS_VERSION"
           )
 
         - | # WiX Toolset 3.11.1  # https://chocolatey.org/packages/wixtoolset/3.11.1
+          # WiX Toolset 3.11.1  # https://chocolatey.org/packages/wixtoolset/3.11.1
           travisfoldtitled 'Install.WiX.Toolset' '### installing WiX Toolset 3.11.1' < <(
             cinst wixtoolset --version "$WIX_TOOLSET_VERSION"
           )
