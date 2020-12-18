@@ -13,7 +13,7 @@ before_install:
     function travisfold() { echo -en "travis_fold:$1:$2\r" ; }
     function travisfoldblock() { travisfold start "$1" ; cat ; travisfold end "$1" ; }
 
-    RED="\033[31;1m"; GREEN="\033[32;1m"; RESET="\033[0m"
+    RED="\033[31;1m"; GREEN="\033[32;1m"; YELLOW="\033[33;1m"; RESET="\033[0m"
     function travis_color() { echo -e "${!1}" "${@:2}" ; }
 
     function travisfoldtitled() { { travis_color GREEN "$2" ; cat ; } 2>&1 | travisfoldblock "$1" ; }
@@ -29,6 +29,8 @@ before_install:
     function my_du() { du --max-depth=3 -h --time "$@" | awk -F '\t' '{OFS="\t"}{print $3, $2 $1}' | sort ; }
 
     function winexec { "$(realpath "$1")" "${@:2}" ; }
+
+    function tr_title { echo -e "$YELLOW" "$@" ; }
 
 
 before_script:
@@ -98,7 +100,8 @@ jobs:
             )
           fi
 
-        - choco install microsoft-visual-cpp-build-tools
+        - powershell Install-WindowsFeature Net-Framework-Core
+        - cinst microsoft-visual-cpp-build-tools
         - which -a msbuild || true
         - cinst wixtoolset --version "$WIX_TOOLSET_VERSION"
 
@@ -217,13 +220,15 @@ jobs:
             - dpkg-dev git-buildpackage fakeroot debhelper
 
       script:
-        - | # ##### script -##### (jobs-include-linux-script)
+        - tr_title '##### script ##### (jobs-include-linux-script)'
 
-        - | # create debian/changelog from git history
-            gbp dch --ignore-branch
+        - |
+          tr_title '# create debian/changelog from git history'
+          gbp dch --ignore-branch
 
-        - | # make linux DEB package
-            dpkg-buildpackage -us -uc
+        - |
+          tr_title '# make linux DEB package'
+          dpkg-buildpackage -us -uc
 
 
 
